@@ -3,20 +3,20 @@
     <AdminSidebar />
     <div class="main-content flex-grow-1 p-4 d-flex flex-column">
       <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Add new Projects</h2>
+        <h2>add new projects</h2>
         <div>
-          <button class="btn btn-primary me-2">save</button>
-          <button class="btn btn-outline-secondary">cancel</button>
+          <button class="btn btn-primary me-2" @click="savebtn">save</button>
+          <button class="btn btn-outline-secondary" @click="cancelbtn">cancel</button>
         </div>
       </div>
       
       <div class="row mb-4">
         <div class="col-lg-4 col-md-6 col-sm-12 mb-3">
-          <h6 class="mb-2">Thumbnail image</h6>
+          <h6 class="mb-2">thumbnail image</h6>
            <!-- 이미지 드래그앤 드롭 위치 -->    
           <div v-if="!imageSrc"
             class="border-style rounded p-3 text-center d-flex flex-column justify-content-center align-items-center"
-            style="height: 200px; position: relative; overflow: hidden;"
+            style="height: 350px; position: relative; overflow: hidden;"
             v-bind="getThumbnailProps()"
             :class="{ 'is-drag-active': isThumbnailDragActive }">
 
@@ -26,35 +26,35 @@
                 type="file"
                 style="position: absolute; top: 0; left: 0; height: 100%; width: 100%; opacity: 0; cursor: pointer;"
               />
-              <span>Drag Your Thumbnail or Click to Select Thumbnail</span>
+              <span>drag your thumbnail or click to select thumbnail</span>
           </div>
 
           <!-- 미리보기 영역  / 미리보기 시에도 사진을 변경하기 위해서 같은 바인딩 넣어줌-->
           <div v-if="imageSrc" 
-          class="border-style rounded p-3 text-center d-flex flex-column justify-content-center align-items-center" 
-          style="height: 200px;"
+          class="border-style rounded p-3 text-center d-flex flex-column justify-content-center align-items-center position-relative" 
+          style="height: 350px;"
           v-bind="getThumbnailProps()" 
           :class="{isDragActive,}">
            <button 
               @click.stop="deleteImage" 
-              class="delete-btn text-end mb-2">
+              class="delete-btn position-absolute top-0 end-0 m-2">
               X
             </button>
-            <img :src="imageSrc" alt="Preview" class="preview-image"/>
+            <img :src="imageSrc" alt="Preview" class="preview-image img-fluid" style="max-height: 300px;"/>
             
           </div>
         </div>
         <div class="col-md-4">
-          <h6 class="mb-2">Project Name</h6>
+          <h6 class="mb-2">project Name</h6>
           <input type="text" class="form-control" v-model="projectName" placeholder="Enter project name" />
         </div>
         <div class="col-md-4">
-          <h6 class="mb-2">Category</h6>
+          <h6 class="mb-2">category</h6>
           <div class="border rounded p-3">
             <div class="mb-3">
               <label for="category" class="form-label">category</label>
               <select class="form-select" v-model="category" id="category">
-                <option value="">Select category</option>
+                <option value="">select category</option>
                 <option value="food">food</option>
                 <option value="person">person</option>
                 <option value="landscape">landscape</option>
@@ -63,7 +63,7 @@
             <div>
               <label for="subcategory" class="form-label">subcategory</label>
               <select class="form-select" v-model="subcategory" id="subcategory">
-                <option value="">Select subcategory</option>
+                <option value="">select subcategory</option>
                 <option value="food">food</option>
                 <option value="person">person</option>
                 <option value="landscape">landscape</option>
@@ -80,7 +80,7 @@
             <h6>Images</h6>
           </div>
           <div class="col-md-6">
-            <h6>Uploading</h6>
+            <h6>uploading</h6>
           </div>
         </div>
         <div class="col-md-6">
@@ -92,7 +92,7 @@
             <div class="mb-3">
               <i class="fas fa-upload fa-3x text-muted"></i>
             </div>
-            <p>Drag Files to upload Or Click to Select Files</p>
+            <p>drag files to upload Or click to select files</p>
             <input
                 v-bind="getImagesInputProps()"
                 accept="image/*"
@@ -117,7 +117,12 @@
                   </div>
                   <div class="d-flex align-items-center">
                     <span class="me-2">{{ file.size }}</span>
-                    <button class="btn btn-sm border border-danger text-danger p-0 px-1" @click="removeFile(index)">×</button>
+                    <button 
+                      class="btn btn-sm border border-danger text-danger d-flex justify-content-center align-items-center p-0"
+                      style="width: 24px; height: 24px; line-height: 1;"
+                      @click="removeFile(index)">
+                      <span class="d-flex align-items-center mb-1" style="font-size: 16px;">×</span>
+                    </button>
                   </div>
                 </div>
                 <!-- 프로그래스바 부분은 삭제할 수도 있음 => 백엔드에 얼마나 등록이 되고 있는 지를 보여주는 것임 -->
@@ -141,15 +146,24 @@
 
 <script setup>
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 import { useDropzone } from 'vue3-dropzone'; // drag And Drop을 위한 npm
 
-
+const router = useRouter();
 const projectName = ref('');
 const category = ref('');
 const subcategory = ref('');
 const imageSrc = ref(null); // 썸네일 미리보기를 사용하기 위한
 const fileInfos = ref([]); // 파일 정보 배열 {미리보기, 이름, 사이즈, 타입}
 
+const savebtn = () => {
+  console.log("save button click");
+}
+
+const cancelbtn = () => {
+  console.log("cancel button click");
+  router.push("/Admin/ManageImages");
+}
 
 const deleteImage = () => {
   imageSrc.value = null;
