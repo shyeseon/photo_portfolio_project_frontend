@@ -108,46 +108,32 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
+import axios from "axios";
 import CategoryList from "./CategoryList.vue";
 import SubCategoryList from "./SubCategoryList.vue";
 
-// 더미 데이터
-const categories = ref([
-  {
-    id: 2,
-    name: "Clothing",
-    subCategories: [
-      { id: 1, name: "Pants" },
-      { id: 2, name: "Sportswear" },
-      { id: 3, name: "Accessories" },
-    ],
-  },
-  {
-    id: 3,
-    name: "Furniture",
-    subCategories: [
-      { id: 1, name: "Chair" },
-      { id: 2, name: "Table" },
-      { id: 3, name: "Bottoms" },
-    ],
-  },
-  {
-    id: 4,
-    name: "Electronics",
-    subCategories: [
-      { id: 1, name: "TV" },
-      { id: 2, name: "Cameras" },
-      { id: 3, name: "Smartphones" },
-    ],
-  },
-]);
-
+const categories = ref([]);
 const selectedCategory = ref(null);
-const categoryToDelete = ref(null); // 삭제할 카테고리 ID 저장
-const subCategoryToDelete = ref(null); // 삭제할 서브 카테고리 ID 저장
-const deletingType = ref(""); // 삭제하는 타입을 구분 (category/subcategory)
-const isDeleteModalVisible = ref(false); // 모달 표시 여부
+const categoryToDelete = ref(null); 
+const subCategoryToDelete = ref(null); 
+const deletingType = ref(""); 
+const isDeleteModalVisible = ref(false);
+
+// 카테고리 데이터 로드 (백엔드에서 가져옴)
+const loadCategories = async () => {
+  try {
+    const response = await axios.get("http://localhost:8181/api/categories");
+    categories.value = response.data; // 백엔드에서 받은 카테고리 데이터를 할당
+    console.log("카테고리 목록 로드 성공:", response.data);
+  } catch (error) {
+    console.error("카테고리 목록 로드 실패:", error);
+  }
+};
+
+onMounted(() => {
+  loadCategories(); // 컴포넌트가 마운트되면 카테고리 목록을 로드
+});
 
 // 카테고리 선택
 const selectCategory = (category) => {
