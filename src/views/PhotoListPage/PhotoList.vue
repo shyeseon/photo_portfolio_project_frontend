@@ -11,7 +11,7 @@
 </div>
     <div class="row row-cols-1 row-cols-md-3 g-4 mt-5">
       <div v-for="photo in displayedImages" :key="photo.id" class="col">
-        <RouterLink :to="`./ListPage/DetailList.vue?id=${photo.id}`" class="card h-100 border-0 text-decoration-none">
+        <RouterLink :to="{name:'DetailList', params:{id:photo.id}}" class="card h-100 border-0 text-decoration-none">
           <div class="skeleton_loading" v-if="isLoading && !allLoaded">
             <div class="skeleton_img w-100 h-100"></div>
           </div>

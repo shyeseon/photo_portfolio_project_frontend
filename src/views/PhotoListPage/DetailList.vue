@@ -8,15 +8,16 @@
           <h2 class="fw-bold mb-0 me-3">{{ projectName }}</h2>
           <h6 class="mb-1">{{ projectCategory }}</h6>
         </div>
-        <masonry-wall v-if="imagesLoaded" :items="displayedImages" :columns="{ default: 3, 1000: 2, 700: 1 }" :gap="15" >
-          <template #default="{ item, index }">
-              <div class="image-item" >
-                <img class="listImage" :src="item.src" :alt="item.alt" @click="modalOpen(item, index)" />
-              </div>
-          </template>
-          
-        </masonry-wall>     
-     
+      
+        <div class="masonry-layout">
+          <!-- 이미지 배열을 담은 컬럼 반복 -->
+        <div v-for="column in columns" :key="column.id" class="masonry-column">
+           <!-- 컬럼 내의 이미지 배열을 반복-->
+          <div v-for="item in column.items" :key="item.id" class="masonry-item">
+            <img :src="item.src" :alt="item.alt" @click="modalOpen(item, item.id)" />
+          </div>
+        </div>
+      </div>
         <div ref="observerTarget" class="w-100 h-auto"></div>
         <!-- 데스크탑에서는 기존 모달 사용 -->
         <ImageDetailModal v-if="!isMobile" id="ImageDetailmodal" @close="closeModal" :objectProp="listImages" :selectedIndex="currentSlideIndex"
@@ -34,10 +35,9 @@
   </template>
   
   <script setup> 
-  import { ref, computed, onMounted } from 'vue';
+  import { ref, computed, onMounted, watch } from 'vue';
   import ImageDetailModal from './ImageDetailModal.vue';
   import SwiperModal from './SwiperModal.vue';
-  import MasonryWall from '@yeger/vue-masonry-wall';
   import { Modal } from 'bootstrap';
   import InfiniteScroll from '@/components/InfiniteScroll.vue';
   
@@ -87,7 +87,8 @@
     { pn: 1, pName: "Wilson", pc: "street", in: 42, src: "/Images/street img4.JPG", alt: "Street Image4" },
     { pn: 1, pName: "Wilson", pc: "street", in: 43, src: "/Images/street img4.JPG", alt: "Street Image4" },
   ]);
-  
+  const { displayedImages, observerTarget } = InfiniteScroll(listImages, 12);
+
   let projectName = ref(listImages.value[0].pName);
   let projectCategory = ref(listImages.value[0].pc);
   let ImageDetailmodal = null;
@@ -96,15 +97,73 @@
   const isMobile = computed(() => window.innerWidth <= 768); // 모바일 화면 감지
   const showSwiperModal = ref(false); // Swiper 모달 상태
   const currentSlideIndex = ref(0); // Swiper에서 현재 열려 있는 슬라이드 인덱스
- 
+
+  const columns = ref([]);
+  const loadedImages = ref(0);
+  const width = ref(window.innerWidth);
+  
+  const columnsCount = computed(() => {
+    if (width.value <= 768) return 1;
+    else if (width.value <= 1200) return 2;
+    else return 3;
+  });
+  
+  //이미지 배열을 담을 컬럼 생성하기
+  const createColumns = () => {
+    columns.value = Array.from({ length: columnsCount.value }, (index) => ({
+      id: index,
+      items: []
+    }));
+  };
+  
+  //생성된 컬럼에 이미지의 크기를 비교해 담기
+const distributeItems = () => {
+  createColumns();
+  //생성된 컬럼을 0으로 모두 초기화 
+  const columnHeights = Array(columnsCount.value).fill(0); 
+
+    displayedImages.value.forEach((image, index) => {
+    //이미지의 높이를 계산하기 위해 이미지 객체를 생성해 src를 할당해 줘야 이미지가 출력됨
+    //onload 이벤트 호출 시 이미지가 로딩될 때 스크롤바가 위로 튕기는 문제가 발생)
+    const img = new Image();
+    img.src = image.src;
+    const imgHeight = calculateImageHeight(img); 
+    //현재 컬럼에서 길이가 가장 짧은 컬럼ㅇ르 찾아 이미지 추가 
+    const shortestColumnIndex = columnHeights.indexOf(Math.min(...columnHeights)); 
+    columns.value[shortestColumnIndex].items.push({
+      id: index,
+      ...image
+    });
+      //이미지를 추가한 컬럼의 높이를 업데이트
+      columnHeights[shortestColumnIndex] += imgHeight;
+    });
+  };
+
+  //이미지 높이를 계산하기 위한 함수 
+  const calculateImageHeight = (img) => {
+    const aspectRatio = img.height / img.width;
+    return  aspectRatio;
+  };
+
+  // 창 크기 변경 시 이미지 재배치
+  const handleResize = () => {
+    width.value = window.innerWidth
+    createColumns();
+    distributeItems(); 
+  };
 
   onMounted(() => {
-    
+  window.addEventListener('resize', handleResize); // Add resize listener
+  });
+
+
+  onMounted(() => {
     preloadImages();
     if (!isMobile.value) {
       ImageDetailmodal = new Modal(document.querySelector("#ImageDetailmodal"));
     }
   });
+
 
   function modalOpen(item, index) {
     if (!isMobile.value) {
@@ -130,7 +189,6 @@
     showSwiperModal.value = false; // Swiper 모달 닫기
   }
   
-
   function preloadImages() {
   let loadedCount = 0;
   const totalImages = listImages.value.length;
@@ -147,27 +205,47 @@
   });
 }
 
-const { displayedImages, observerTarget } = InfiniteScroll(listImages, 12);
 
+watch(displayedImages, () => {
+  distributeItems();
+  loadedImages.value = 0;
+}, { deep: true });
 
+watch(columnsCount, ()=>{
+  width.value = window.innerWidth;
+  createColumns(); 
+  distributeItems();
+})
 
-
-  </script>
+</script>
   
-  <style scoped>
-  html {
-  scroll-behavior: smooth;
+<style scoped>
+html {
+  scroll-behavior: smooth; /* 부드러운 스크롤 */
 }
-  .list {
-    margin: 0 2.25rem;
-  }
+.list {
+  margin: 0 2.25rem;
+}
   
-  .image-item img {
-    width: 100%;
-    height: auto;
-    display: block;
-  }
- .skeleton_loading {
+.masonry-layout {
+  display: flex;
+  gap: 10px;
+}
+
+.masonry-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.masonry-item img {
+  width: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.skeleton_loading {
     position: absolute;
     width: 100%;
     height: 100%;
@@ -185,8 +263,6 @@ const { displayedImages, observerTarget } = InfiniteScroll(listImages, 12);
     background-position: 100% 0;
     animation: load 1s infinite;
 }
- 
 
-
-  </style>
+</style>
   

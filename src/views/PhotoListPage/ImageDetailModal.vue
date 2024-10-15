@@ -44,17 +44,16 @@ import {  onMounted, ref, watch } from 'vue';
 
 let ModalClose=null;
 const emit=defineEmits(['close']);
+
+const props = defineProps(['objectProp','selectedIndex']);
+const currentIndex = ref(props.selectedIndex);
+const imageStates = ref({});
+
 onMounted(() => {
   ModalClose = document.querySelector(".closeBtn");
   ModalClose.addEventListener("click", allReset);
 
 });
-
-
-
-const props = defineProps(['objectProp','selectedIndex']);
-const currentIndex = ref(props.selectedIndex);
-const imageStates = ref({});
 
 //사진 클릭 시 확대 및 축소 기능 
 const handleZoom = (index)=> {
@@ -86,6 +85,7 @@ const imageReset= (index)=>{
   }
 }
 
+//전체 초기화 
 const allReset= () => {
   for (let index in imageStates.value) {
     if (imageStates.value[index]) {
