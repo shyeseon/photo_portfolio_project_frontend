@@ -9,7 +9,7 @@
     </div>
 
     <div class="mb-3">
-      <div @click="$emit('addSubCategory')">
+      <div class="new-button rounded" @click="$emit('addSubCategory')">
         <span>+ </span>
         <span class="text-decoration-underline">New Sub-category</span>
       </div>
@@ -32,3 +32,14 @@ const subCategoriesList = computed({
   set: (value) => emit('update:subCategories', value)
 });
 </script>
+
+<style scoped>
+.new-button {
+  cursor: pointer;
+  padding: 10px;
+}
+.new-button:hover{
+  background-color: #ddd;
+  transition: 0.25s ease;
+}
+</style>
