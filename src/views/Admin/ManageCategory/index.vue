@@ -124,8 +124,6 @@ const categoryToDelete = ref(null);
 const subCategoryToDelete = ref(null);
 const deletingType = ref("");
 const isDeleteModalVisible = ref(false);
-const isWarningModalVisible = ref(false);
-const modalMessage = ref(null);
 
 // 카테고리 데이터 로드
 const loadCategories = async () => {
@@ -139,13 +137,13 @@ const loadCategories = async () => {
   }
 };
 
-const createCategories = async (newCategory) => {
+const createCategory = async (newCategory) => {
   try {
     // POST 요청으로 새 카테고리 데이터를 백엔드로 전송
     const response = await axios.post("/categories", newCategory);
 
     if (response.data && typeof response.data === "object") {
-      // 응답 받은 새 카테고리 데이터를 categories 배열에 추가 (올바른 객체 확인 후 추가)
+      // 응답 받은 새 카테고리 데이터를 categories 배열에 추가
       categories.value.push(response.data);
       console.log("Category created successfully:", response.data);
     } else {
@@ -153,6 +151,20 @@ const createCategories = async (newCategory) => {
     }
   } catch (error) {
     console.error("Failed to create category:", error);
+  }
+};
+
+const updateCategory = async (id, newName) => {
+  const category = categories.value.find((cat) => cat.id === id);
+  if (category) {
+    try {
+      // PUT request to update category name
+      await axios.put(`/categories/${id}`, { name: newName });
+      category.name = newName; // Update UI after successful API call
+      console.log("Category updated successfully:", id);
+    } catch (error) {
+      console.error("Failed to update category:", error);
+    }
   }
 };
 
@@ -187,15 +199,52 @@ const deleteCategory = async (categoryId) => {
   }
 };
 
+const createSubCategory = async (newSubCategory) => {
+  if (!selectedCategory.value) {
+    console.error("No category selected.");
+    return;
+  }
+
+  try {
+    // POST 요청으로 새 서브 카테고리 데이터를 백엔드로 전송
+    const response = await axios.post(
+      `/category/${selectedCategory.value.id}/subcategory`,
+      newSubCategory
+    );
+
+    if (response.data && typeof response.data === "object") {
+      // 응답 받은 새 서브 카테고리 데이터를 해당 카테고리에 추가
+      if (!selectedCategory.value.subCategories) {
+        selectedCategory.value.subCategories = [];
+      }
+      selectedCategory.value.subCategories.push(response.data);
+      console.log("Subcategory created successfully:", response.data);
+    } else {
+      console.error("Invalid subcategory data:", response.data);
+    }
+  } catch (error) {
+    console.error("Failed to create subcategory:", error);
+  }
+};
+
 const deleteSubCategory = async (subCategoryId) => {
   try {
-    await axios.delete(`/subcategories/${subCategoryId}`);
-    // 삭제 후 프론트엔드에서 서브카테고리를 제거
-    selectedCategory.value.subCategories =
-      selectedCategory.value.subCategories.filter(
-        (sub) => sub.id !== subCategoryId
+    const response = await axios.get(`/subcategory/${subCategoryId}/used`);
+    const isUsed = response.data; // 백엔드에서 boolean 값 반환
+    if (isUsed) {
+      // 사용 중이면 경고 모달 띄우기
+      alert(
+        "The category is being used in a project, or a subcategory is being used in a project, so it cannot be deleted"
       );
-    console.log("서브카테고리 삭제 성공:", subCategoryId);
+    } else {
+      await axios.delete(`/subcategory/${subCategoryId}`);
+      // 삭제 후 프론트엔드에서 서브카테고리를 제거
+      selectedCategory.value.subCategories =
+        selectedCategory.value.subCategories.filter(
+          (sub) => sub.id !== subCategoryId
+        );
+      console.log("서브카테고리 삭제 성공:", subCategoryId);
+    }
   } catch (error) {
     console.error("서브카테고리 삭제 실패:", error);
   }
@@ -219,38 +268,42 @@ const selectCategory = (category) => {
 const addCategory = () => {
   const newCategory = { name: "New Category" };
   // 새 카테고리를 생성 후 서버로 전송
-  createCategories(newCategory);
+  createCategory(newCategory);
 };
 
-// 카테고리 수정
-const updateCategory = (id, newName) => {
-  const category = categories.value.find((cat) => cat.id === id);
-  if (category) {
-    category.name = newName;
-  }
-};
+// // 카테고리 수정
+// const updateCategory = (id, newName) => {
+//   const category = categories.value.find((cat) => cat.id === id);
+//   if (category) {
+//     category.name = newName;
+//   }
+// };
 
 // 서브 카테고리 추가
 const addSubCategory = () => {
   if (selectedCategory.value) {
-    if (!selectedCategory.value.subCategories) {
-      selectedCategory.value.subCategories = [];
-    }
-    selectedCategory.value.subCategories.push({
-      id: Date.now(),
-      name: "New Sub-category",
-    });
+    const newSubCategory = { name: "New SubCategory" };
+    createSubCategory(newSubCategory);
+  } else {
+    console.error("No category selected to add a subcategory.");
   }
 };
 
 // 서브 카테고리 수정
-const updateSubCategory = (subCategoryId, newName) => {
+const updateSubCategory = async (subCategoryId, newName) => {
   if (selectedCategory.value && selectedCategory.value.subCategories) {
     const subCategory = selectedCategory.value.subCategories.find(
       (sub) => sub.id === subCategoryId
     );
     if (subCategory) {
-      subCategory.name = newName;
+      try {
+        // PUT request to update subcategory name
+        await axios.put(`/subcategories/${subCategoryId}`, { name: newName });
+        subCategory.name = newName; // Update UI after successful API call
+        console.log("Subcategory updated successfully:", subCategoryId);
+      } catch (error) {
+        console.error("Failed to update subcategory:", error);
+      }
     }
   }
 };
