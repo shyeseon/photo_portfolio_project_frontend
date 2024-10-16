@@ -13,7 +13,6 @@
             <div class="col-md-4"></div>
             <div class="col-md-4"></div>
           </div>
-
           <div class="row gx-5 mt-4">
             <div class="col-md-4 custom-border">
               <div class="mx-auto w-100">
@@ -29,7 +28,11 @@
             </div>
             <div class="col-md-4 custom-border">
               <CategoryList
-                :categories="categories"
+                :categories="
+                  categories.filter(
+                    (cat) => typeof cat === 'object' && cat !== null
+                  )
+                "
                 :selectedCategory="selectedCategory"
                 @selectCategory="selectCategory"
                 @addCategory="addCategory"
@@ -48,14 +51,14 @@
             </div>
           </div>
 
-          <div class="row button-group">
+          <!-- <div class="row button-group">
             <div class="col-12 d-flex justify-content-end">
               <button class="btn btn-choice btn-primary me-2">Save</button>
-              <button class="btn btn-choice btn-outline-secondary">
-                Cancel
+              <button class="btn btn-choice btn-outline-secondary" @click="resetCategories">
+                Reset
               </button>
             </div>
-          </div>
+          </div> -->
         </div>
       </div>
     </div>
@@ -112,28 +115,100 @@ import { ref, onMounted } from "vue";
 import axios from "axios";
 import CategoryList from "./CategoryList.vue";
 import SubCategoryList from "./SubCategoryList.vue";
+import "@/apis/axiosConfig";
 
 const categories = ref([]);
+const initialCategories = ref([]); // 초기 상태를 저장하는 변수
 const selectedCategory = ref(null);
-const categoryToDelete = ref(null); 
-const subCategoryToDelete = ref(null); 
-const deletingType = ref(""); 
+const categoryToDelete = ref(null);
+const subCategoryToDelete = ref(null);
+const deletingType = ref("");
 const isDeleteModalVisible = ref(false);
+const isWarningModalVisible = ref(false);
+const modalMessage = ref(null);
 
-// 카테고리 데이터 로드 (백엔드에서 가져옴)
+// 카테고리 데이터 로드
 const loadCategories = async () => {
   try {
-    const response = await axios.get("http://localhost:8181/api/categories");
+    const response = await axios.get("/categories");
     categories.value = response.data; // 백엔드에서 받은 카테고리 데이터를 할당
+    initialCategories.value = JSON.parse(JSON.stringify(response.data)); // 데이터를 복사해서 초기 상태로 저장
     console.log("카테고리 목록 로드 성공:", response.data);
   } catch (error) {
     console.error("카테고리 목록 로드 실패:", error);
   }
 };
 
+const createCategories = async (newCategory) => {
+  try {
+    // POST 요청으로 새 카테고리 데이터를 백엔드로 전송
+    const response = await axios.post("/categories", newCategory);
+
+    if (response.data && typeof response.data === "object") {
+      // 응답 받은 새 카테고리 데이터를 categories 배열에 추가 (올바른 객체 확인 후 추가)
+      categories.value.push(response.data);
+      console.log("Category created successfully:", response.data);
+    } else {
+      console.error("Invalid category data:", response.data);
+    }
+  } catch (error) {
+    console.error("Failed to create category:", error);
+  }
+};
+
+// 카테고리 삭제 함수
+const deleteCategory = async (categoryId) => {
+  try {
+    // 백엔드에 카테고리가 사용 중인지 확인하는 API 호출 (axios 사용)
+    const response = await axios.get(`/categories/${categoryId}/used`);
+    const isUsed = response.data; // 백엔드에서 boolean 값 반환
+
+    if (isUsed) {
+      // 사용 중이면 경고 모달 띄우기
+      alert(
+        "The category is being used in a project, or a subcategory is being used in a project, so it cannot be deleted"
+      );
+    } else {
+      // 사용 중이 아니면 삭제 진행
+      const deleteResponse = await axios.delete(`/categories/${categoryId}`);
+
+      if (deleteResponse.status === 200) {
+        // 삭제 성공 시 처리
+        alert("카테고리가 삭제되었습니다.");
+        // UI에서 카테고리 제거
+        removeCategoryFromUI(categoryId);
+      } else {
+        // 삭제 실패 시 처리
+        alert("카테고리 삭제에 실패했습니다.");
+      }
+    }
+  } catch (error) {
+    console.error("카테고리 사용 확인 또는 삭제 중 오류 발생:", error);
+  }
+};
+
+const deleteSubCategory = async (subCategoryId) => {
+  try {
+    await axios.delete(`/subcategories/${subCategoryId}`);
+    // 삭제 후 프론트엔드에서 서브카테고리를 제거
+    selectedCategory.value.subCategories =
+      selectedCategory.value.subCategories.filter(
+        (sub) => sub.id !== subCategoryId
+      );
+    console.log("서브카테고리 삭제 성공:", subCategoryId);
+  } catch (error) {
+    console.error("서브카테고리 삭제 실패:", error);
+  }
+};
+
 onMounted(() => {
   loadCategories(); // 컴포넌트가 마운트되면 카테고리 목록을 로드
 });
+
+// UI에서 카테고리 제거 함수
+function removeCategoryFromUI(categoryId) {
+  categories.value = categories.value.filter((cat) => cat.id !== categoryId);
+}
 
 // 카테고리 선택
 const selectCategory = (category) => {
@@ -142,8 +217,9 @@ const selectCategory = (category) => {
 
 // 카테고리 추가
 const addCategory = () => {
-  const newCategory = { id: Date.now(), name: "New Category" };
-  categories.value.push(newCategory);
+  const newCategory = { name: "New Category" };
+  // 새 카테고리를 생성 후 서버로 전송
+  createCategories(newCategory);
 };
 
 // 카테고리 수정
@@ -196,9 +272,7 @@ const confirmDeleteCategory = (id) => {
 // 모달에서 삭제 확정
 const deleteConfirmed = () => {
   if (deletingType.value === "category") {
-    categories.value = categories.value.filter(
-      (cat) => cat.id !== categoryToDelete.value
-    );
+    deleteCategory(categoryToDelete.value); // 선택된 카테고리 삭제
     if (
       selectedCategory.value &&
       selectedCategory.value.id === categoryToDelete.value
@@ -207,10 +281,7 @@ const deleteConfirmed = () => {
     }
     categoryToDelete.value = null;
   } else if (deletingType.value === "subcategory" && selectedCategory.value) {
-    selectedCategory.value.subCategories =
-      selectedCategory.value.subCategories.filter(
-        (sub) => sub.id !== subCategoryToDelete.value
-      );
+    deleteSubCategory(subCategoryToDelete.value); // 선택된 서브카테고리 삭제
     subCategoryToDelete.value = null;
   }
   isDeleteModalVisible.value = false;
