@@ -1,5 +1,4 @@
 import axios from "axios";
-import router from "@/router";
 
 // 기본 경로 설정
 axios.defaults.baseURL = "http://localhost:8181/api";
@@ -12,7 +11,7 @@ axios.interceptors.response.use(
     (err) => {
         if(err.response && err.response.status === 401) {
             console.error("인증 실패");
-            router.push("/login");
+            window.location.href = "http://localhost:8181/login";
         }
         return Promise.reject(err);
     }

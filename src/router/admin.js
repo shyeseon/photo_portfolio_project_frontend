@@ -4,11 +4,11 @@ const routes = [
         component: () => import (/* webpackChunkName: "Admin" */ '@/views/Admin/AdminUpload')
     },
 
-    {
-      path: "/Admin/Login",
-      component: () =>
-        import(/* webpackChunkName: "Admin" */ "@/views/Admin/Login"),
-    },
+    // {
+    //   path: "/Admin/Login",
+    //   component: () =>
+    //     import(/* webpackChunkName: "Admin" */ "@/views/Admin/Login"),
+    // },
     {
       path: "/Admin/ManageCategory",
       component: () =>
