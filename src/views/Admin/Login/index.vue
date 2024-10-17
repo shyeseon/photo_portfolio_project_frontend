@@ -75,16 +75,14 @@ const handleLoginSubmit = async () => {
     const formData = new FormData();
     formData.append("id", admin.value.id);
     formData.append("password", admin.value.password);
-
-    const response = await axios.post("http://localhost:8181/loginProcess", formData);
-    if(response.status === 200) {
-      const adminId = response.data;
-      console.log(adminId, " 로그인"); // login success 문구
-      store.commit("login", adminId); // id 저장 
+    
+    await store.dispatch("login", formData);
+    
+    if(store.state.id) {
       router.push("/Admin/ManageImages");
     }
+
   } catch (error) {
-    console.log("로그인 에러 : ", error);
     // loginError.value = 
     //   (admin.value.id !== tempId && admin.value.password !== tempPassword) ? "both"
     //   : admin.value.id !== tempId ? "id"

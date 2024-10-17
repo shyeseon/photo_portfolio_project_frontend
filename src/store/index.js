@@ -1,4 +1,5 @@
 import { createStore } from 'vuex'
+import axios from 'axios';
 
 export default createStore({
   state: {
@@ -12,8 +13,15 @@ export default createStore({
     }
   },
   actions: {
-    login({commit}, id) {
-      commit("login", id);
+    async login({commit}, formData) {
+      try {
+        const response = await axios.post("http://localhost:8181/loginProcess", formData);
+        if(response.status === 200) {
+          commit("login", response.data);
+        }
+      } catch (error) {
+        console.log("로그인 에러 : ", error);
+      }
     }
   },
   modules: {
