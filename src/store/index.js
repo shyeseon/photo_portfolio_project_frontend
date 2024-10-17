@@ -3,13 +3,14 @@ import axios from 'axios';
 
 export default createStore({
   state: {
-    id: ""
+    id: "" || sessionStorage.getItem("id")
   },
   getters: {
   },
   mutations: {
     login(state, id) {
-      state.id = id
+      state.id = id;
+      sessionStorage.setItem("id", id);
     }
   },
   actions: {
