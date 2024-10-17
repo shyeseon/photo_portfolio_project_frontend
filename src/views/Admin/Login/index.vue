@@ -55,6 +55,7 @@
 <script setup>
 import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
+import store from "@/store";
 import axios from "axios";
 const router = useRouter();
 
@@ -77,7 +78,9 @@ const handleLoginSubmit = async () => {
 
     const response = await axios.post("http://localhost:8181/loginProcess", formData);
     if(response.status === 200) {
-      console.log(response.data); // login success 문구
+      const adminId = response.data;
+      console.log(adminId, " 로그인"); // login success 문구
+      store.commit("login", adminId); // id 저장 
       router.push("/Admin/ManageImages");
     }
   } catch (error) {
