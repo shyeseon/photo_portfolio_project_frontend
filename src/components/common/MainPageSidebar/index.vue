@@ -16,6 +16,7 @@
               data-bs-target="#collapsePhotoProjects"
               aria-expanded="true"
               aria-controls="collapsePhotoProjects"
+    
             >
               Photo projects
             </button>
@@ -28,25 +29,8 @@
           >
             <div class="accordion-body pt-0 mb-3">
               <ul class="nav flex-column">
-                <li class="nav-item">
-                  <RouterLink class="nav-link" to="/" @click="menuItemClicked"
-                    >All</RouterLink
-                  >
-                </li>
-                <li class="nav-item">
-                  <RouterLink class="nav-link" to="#" @click="menuItemClicked"
-                    >Food</RouterLink
-                  >
-                </li>
-                <li class="nav-item">
-                  <RouterLink class="nav-link" to="#" @click="menuItemClicked"
-                    >Model</RouterLink
-                  >
-                </li>
-                <li class="nav-item">
-                  <RouterLink class="nav-link" to="#" @click="menuItemClicked"
-                    >Landscape</RouterLink
-                  >
+                <li class="nav-item" v-for="(category) in categories" :key="category.id">
+                  <RouterLink class="nav-link"  :to="`/PhotoListPage/PhotoList.vue?categoryId=${category.id}`" @click="menuItemClicked">{{ category.name }}</RouterLink>
                 </li>
               </ul>
             </div>
@@ -84,6 +68,26 @@
 </template>
 
 <script setup>
+import axios from 'axios';
+import { ref } from 'vue';
+import "@/apis/axiosConfig";
+
+const categories = ref([]);
+const getCategory = async() =>{
+  try{
+    const response = await axios.get("/categories");
+    categories.value = response.data.map (category => ({
+      id:category.id,
+      name:category.name
+    }));
+  }catch{
+    console.error("category 로드 실패" + Error);
+  }
+}
+
+
+  getCategory();
+
 const emit = defineEmits(["menuItemClicked"]);
 
 function menuItemClicked() {
