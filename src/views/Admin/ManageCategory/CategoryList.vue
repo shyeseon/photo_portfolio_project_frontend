@@ -9,8 +9,8 @@
         @delete="$emit('deleteCategory', element.id)"
       />
     </div>
-    <div class="mb-3">
-      <div @click="$emit('addCategory')">
+    <div class="mb-3 ">
+      <div class="new-button rounded" @click="$emit('addCategory')">
         <span>+ </span>
         <span class="text-decoration-underline">New Category</span>
       </div>
@@ -31,7 +31,7 @@ const emit = defineEmits([
   "selectCategory",
   "addCategory",
   "updateCategory",
-  "deleteCategory"
+  "deleteCategory",
 ]);
 
 const categoriesList = computed({
@@ -39,3 +39,14 @@ const categoriesList = computed({
   set: (value) => emit("update:categories", value),
 });
 </script>
+
+<style scoped>
+.new-button {
+  cursor: pointer;
+  padding: 10px;
+}
+.new-button:hover{
+  background-color: #ddd;
+  transition: 0.25s ease;
+}
+</style>

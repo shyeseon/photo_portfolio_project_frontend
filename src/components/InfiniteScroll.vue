@@ -51,12 +51,9 @@ try {
 };
 
 onMounted(() => {
-
-console.log(observerTarget.value);
 const observer = new IntersectionObserver(
  (entries) => {
    if (entries[0].isIntersecting) {
-     console.log("Intersection detected");
      loadMoreItems();
    }
  },
