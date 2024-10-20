@@ -52,22 +52,26 @@
         <div class="col-md-4">
           <h6 class="mb-2">category</h6>
           <div class="border rounded p-3">
+            <!-- 카테고리 부분 -->
             <div class="mb-3">
               <label for="category" class="form-label">category</label>
-              <select class="form-select" v-model="category" id="category">
-                <option value="">select category</option>
-                <option value="food">food</option>
-                <option value="person">person</option>
-                <option value="landscape">landscape</option>
+              <select class="form-select"
+               id="category"
+              v-model="selectedCategoryId"
+              @change="handleCategoryChange(selectedCategoryId)">
+                <option v-for="category in categories" :key="category.id" :value="category.id">
+                    {{ category.name }}
+                </option>
               </select>
             </div>
+            <!-- 서브 카테고리 부분 -->
             <div>
               <label for="subcategory" class="form-label">subcategory</label>
-              <select class="form-select" v-model="subcategory" id="subcategory">
-                <option value="">select subcategory</option>
-                <option value="food">food</option>
-                <option value="person">person</option>
-                <option value="landscape">landscape</option>
+              <select class="form-select" v-model="selectedSubcategoryId" id="subcategory">
+                <option v-for="subCategory in selectedSubcategories" :key="subCategory.id" :value="subCategory.id">
+                  {{ subCategory.name }}
+                </option>
+          
               </select>
             </div>
           </div>
@@ -87,7 +91,7 @@
         <div class="col-md-6">
           
           <!-- 다중 이미지 드래그 앤 드랍 위치-->
-          <div class="border-style rounded p-3 text-center d-flex flex-column justify-content-center align-items-center" style="height: 400px;"
+          <div class="border-style rounded p-3 text-center d-flex flex-column justify-content-center align-items-center " style="height: 400px;"
           v-bind="getImagesProps()"
             :class="{ 'is-drag-active': isImagesDragActive }">
             <div class="mb-3">
@@ -98,7 +102,7 @@
                 v-bind="getImagesInputProps()"
                 accept="image/*"
                 type="file"
-                style="position: absolute; top: 0; left: 0; height: 100%; width: 100%; opacity: 0; cursor: pointer;"
+                style="position: absolute; top: 0; left: 0; height: 100%; width: 100%; opacity: 0; cursor: pointer !important;"
               />
           </div>
         </div>
@@ -146,20 +150,81 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
+import axios from "axios";
+import "@/apis/axiosConfig";
 import { useRouter, useRoute } from 'vue-router';
 import { useDropzone } from 'vue3-dropzone'; // drag And Drop을 위한 npm
 const route = useRoute();
 const router = useRouter();
-const projectName = ref('');
-const category = ref('');
-const subcategory = ref('');
+const selectedCategoryId = ref(); // 선택된 카테고리 아이디
+const selectedCategory = ref({}); // 선택된 카테고리 객체
+const selectedSubcategoryId = ref(); // 선택된 서브 카테고리 아이디
+const selectedSubcategories = ref({}); // 선택된 서브 카테고리 객체
+const projectName = ref(''); //프로젝트 title
+const categories = ref([]); // 받아온 카테고리들
 const imageSrc = ref(null); // 썸네일 미리보기를 사용하기 위한
 const fileInfos = ref([]); // 파일 정보 배열 {미리보기, 이름, 사이즈, 타입}
+const thumbnailMultipartFile  = ref(null); // 썸네일 사진 
+const photoMultipartFiles = ref([]); // 다중 이미지 사진
 
-const savebtn = () => {
-  console.log("save button click");
+onMounted(() => {
+  loadCategories(); // DOM 마운트 되었을시 카테고리 받아오는 로직 실행
+});
+
+// 카테고리 선택시
+const handleCategoryChange = (selectedCategoryId) => {
+  console.log("카테고리 id: " + selectedCategoryId)
+  // 선택된 카테고리의 서브 카테고리만 보이도록 저장
+  selectedCategory.value = categories.value.find((cate) => cate.id === selectedCategoryId);
+  selectedSubcategories.value = selectedCategory.value.subCategories;
 }
+
+// 프로젝트 저장
+const savebtn = async() => {
+  const formData = new FormData();
+
+  // 이름 저장
+  console.log("프로젝트 이름: " + projectName.value);
+  formData.append("title", projectName.value);
+
+  // 썸네일 파일 저장
+  console.log("썸네일 사진: " + thumbnailMultipartFile.value);
+  formData.append("thumbnailMultipartFile", thumbnailMultipartFile.value);
+
+  // 포토 파일 저장
+  for(let i = 0; i<photoMultipartFiles.value.length; i++){
+    formData.append("photoMultipartFiles",photoMultipartFiles.value[i]);
+    console.log("사진" + i +":" +photoMultipartFiles.value[i]);
+  }
+  console.log("사진들: "+photoMultipartFiles.value)
+
+  // 선택된 카테고리
+  console.log("선택된 카테고리 Id: " + selectedCategoryId.value);
+  formData.append("categoryId", selectedCategoryId.value);
+
+  // 선택된 서브카테고리
+  console.log("서브카테고리 ID: " + selectedSubcategoryId.value);
+  formData.append("subcategoryId", selectedSubcategoryId.value);
+
+  // 프로젝트 생성 요청
+  await axios.post("/create/project", formData);
+}
+
+// 카테고리 데이터 불러오기
+const loadCategories = async () => {
+  try {
+    // 카테고리 요청
+    const response = await axios.get("/categories");
+    // 받아온 카테고리 저장
+    categories.value = response.data;
+    // initialCategories.value = JSON.parse(JSON.stringify(response.data)); // 데이터를 복사해서 초기 상태로 저장
+    console.log("카테고리 목록 로드 성공:", response.data);
+    
+  } catch (error) {
+    console.error("카테고리 목록 로드 실패:", error);
+  }
+};
 
 const cancelbtn = () => {
   console.log("cancel button click");
@@ -168,6 +233,7 @@ const cancelbtn = () => {
 
 const deleteImage = () => {
   imageSrc.value = null;
+  thumbnailMultipartFile.value = null;
   // 필요하다면 파일 입력을 초기화하는 로직을 여기에 추가하세요
 }
 
@@ -178,6 +244,7 @@ const changeMB = (size) => {
 
 const removeFile = (index) => {
   fileInfos.value.splice(index,1);
+  photoMultipartFiles.value.splice(index, 1);
 }
 
 // --------------Thumbnail 파일 드래그엔 드랍---------------------
@@ -205,7 +272,8 @@ const onDrop = (acceptedFiles, rejectReasons) => {
   }
   if (acceptedFiles.length > 0 &&acceptedFiles[0].type.startsWith('image/')) {
     // 첫 번째 파일만 처리하기 위해서 배열에서 첫번째 인덱스만 매개변수로 보냄
-    FirstFileUpload(acceptedFiles[0]); 
+    FirstFileUpload(acceptedFiles[0]);
+    thumbnailMultipartFile.value = acceptedFiles[0];
   } else {
     alert('Only image files can be uploaded.');
   }
@@ -236,6 +304,8 @@ const onDrops = (acceptedFiles, rejectReasons) => {
       if(imageFiles.length === acceptedFiles.length){
          // 배열 자체를 전달함
         MultiFileUpload(imageFiles); 
+        photoMultipartFiles.value = [...photoMultipartFiles.value, ...acceptedFiles];
+        console.log("사진 저장: " + photoMultipartFiles.value);
       } else {
         alert('Only image files can be uploaded.');
       }
