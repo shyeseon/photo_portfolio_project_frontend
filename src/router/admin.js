@@ -1,7 +1,8 @@
 const routes = [
     {
         path: '/Admin/AdminUpload',
-        component: () => import (/* webpackChunkName: "Admin" */ '@/views/Admin/AdminUpload')
+        component: () => import (/* webpackChunkName: "Admin" */ '@/views/Admin/AdminUpload'),
+        meta: { requiresAuth: true }
     },
 
     {
@@ -13,11 +14,13 @@ const routes = [
       path: "/Admin/ManageCategory",
       component: () =>
         import(/* webpackChunkName: "Admin" */ "@/views/Admin/ManageCategory"),
+      meta: { requiresAuth: true }
     },
     {
       path: "/Admin/ManageImages",
       component: () =>
         import(/* webpackChunkName: "Admin" */ "@/views/Admin/ManageImages"),
+      meta: { requiresAuth: true }
     },
 ];
 
