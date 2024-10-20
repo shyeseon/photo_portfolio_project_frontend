@@ -143,6 +143,8 @@
 <script setup>
 import { ref, computed } from "vue";
 import Pagination from "./Pagination.vue";
+import { useRouter } from "vue-router";
+const router = useRouter();
 
 const currentItemNo = ref(0);
 const currentSort = ref("");
@@ -208,9 +210,13 @@ const sortedItems = computed(() => {
   });
 });
 
+// edit 버튼 함수 클릭 시 수행 
 function clickEdit(index) {
   console.log("수정 index: " + index);
+  router.push(`AdminUpload/${index}`);
+  
 }
+
 function clickDelete(index) {
   currentItemNo.value = index;
 }

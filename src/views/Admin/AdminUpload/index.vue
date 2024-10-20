@@ -3,7 +3,8 @@
     <AdminSidebar />
     <div class="main-content flex-grow-1 p-4 d-flex flex-column">
       <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>add new projects</h2>
+        <h2 v-if="route.params.id">edit projects</h2>
+        <h2 v-else>add new projects</h2>
         <div>
           <button class="btn btn-primary me-2" @click="savebtn">save</button>
           <button class="btn btn-outline-secondary" @click="cancelbtn">cancel</button>
@@ -146,9 +147,9 @@
 
 <script setup>
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { useDropzone } from 'vue3-dropzone'; // drag And Drop을 위한 npm
-
+const route = useRoute();
 const router = useRouter();
 const projectName = ref('');
 const category = ref('');
