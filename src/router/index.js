@@ -1,7 +1,7 @@
 import HomeView from '../views/HomeView.vue'
 import admin from './admin';
 import { createRouter, createWebHistory } from "vue-router";
-
+import store from '@/store';
 import Image from "./Image"
 
 
@@ -38,6 +38,16 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
   routes,
+});
+
+router.beforeEach((to, from, next) => {
+
+  if(to.matched.some(record => record.meta.requiresAuth) && !store.state.id) {
+      next("/Admin/Login")
+  } else {
+    // 로그인 되어 있거나 인증이 필요 없는 경우 그대로 이동 
+    next()
+  }
 });
 
 export default router;
