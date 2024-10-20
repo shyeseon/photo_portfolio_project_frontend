@@ -2,7 +2,7 @@
   <div class="admin-container d-flex container-fluid p-0">
     <div class="admin-content flex-grow-1">
       <div class="manage-category">
-        <h3 class="bg-dark text-white p-3 ps-4 mb-4 fw-bold pe-none">Manage Proejects</h3>
+        <h3 class="bg-dark text-white p-3 ps-4 mb-4 fw-bold pe-none">Manage Projects</h3>
         <div class="manage-image-padding">
           <div class="d-flex justify-content-end align-items-center">
             <RouterLink class="btn btn-primary" to="/Admin/AdminUpload"
@@ -10,7 +10,7 @@
             >
           </div>
           <table class="table table-hover text-center align-middle mt-4">
-            <thead>
+            <!-- <thead>
               <tr>
                 <th @click="sort('no')" class="category col-md-1">
                   No
@@ -51,24 +51,24 @@
                 </th>
                 <th class="col-md-2"></th>
               </tr>
-            </thead>
+            </thead> -->
             <tbody>
-              <tr v-for="(item, index) in sortedItems" :key="index">
-                <td class="pe-none">{{ item.no }}</td>
+              <tr v-for="project in projects" :key="project.id">
+                <td class="pe-none">{{ project.id }}</td>
                 <td>
                   <img
-                    :src="item.thumbnail"
+                    :src="project.imageUrl"
                     alt="thumbnail"
                     style="width: 100px; height: 100px"
                   />
                 </td>
                 <td>
-                  <span class="underline-text pe-none">{{ item.projectName }}</span>
+                  <span class="underline-text pe-none">{{ project.title }}</span>
                 </td>
-                <td class="pe-none">{{ item.category }}</td>
-                <td class="pe-none">{{ item.date }}</td>
-                <td class="pe-none">+{{ item.images }}</td>
-                <td class="pe-none">{{ item.views }}</td>
+                <td class="pe-none">{{ project.categoryName }}</td>
+                <td class="pe-none">{{ project.createdAt }}</td>
+                <td class="pe-none">+{{ project.imageCount }}</td>
+                <td class="pe-none">{{ project.view }}</td>
                 <td>
                   <div
                     class="d-flex flex-column justify-content-center align-items-center"
@@ -141,72 +141,47 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import Pagination from "./Pagination.vue";
+import axios from "axios";
+import "@/apis/axiosConfig";
 
 const currentItemNo = ref(0);
 const currentSort = ref("");
 const currentSortDir = ref("asc");
+const projects = ref([]);
 
-//dummy data
-const items = ref([
-  {
-    no: 41,
-    thumbnail:
-      "https://www.summahealth.org/-/media/project/summahealth/website/page-content/flourish/2_18a_fl_fastfood_400x400.webp?la=en&h=400&w=400&hash=145DC0CF6234A159261389F18A36742A",
-    projectName: "프로젝트 이름21",
-    category: "Food",
-    date: "2022.12.03",
-    images: 7,
-    views: 5,
-  },
-  {
-    no: 40,
-    thumbnail:
-      "https://static.wtable.co.kr/image/production/service/recipe/1718/531d4f4a-f370-40ba-b7d3-e844f356ee5d.jpg",
-    projectName: "프로젝트 이름2",
-    category: "Portraits",
-    date: "2022.12.06",
-    images: 6,
-    views: 3,
-  },
-  {
-    no: 39,
-    thumbnail:
-      "https://ssproxy.ucloudbiz.olleh.com/v1/AUTH_e59809eb-bdc9-44d7-9d8f-2e7f0e47ba91/store16/88b344473efdb0d217f35b22e67194ab_731x688.JPG",
-    projectName: "프로젝트 이름3",
-    category: "Street",
-    date: "2022.12.05",
-    images: 12,
-    views: 4,
-  },
-  {
-    no: 38,
-    thumbnail: "https://img.choroc.com/newshop/goods/009179/009179_1.jpg",
-    projectName: "프로젝트 이름4",
-    category: "Food",
-    date: "2022.12.05",
-    images: 16,
-    views: 2,
-  },
-]);
+onMounted(() => {
+  loadProjects();
+});
 
-const sort = (s) => {
-  if (s === currentSort.value) {
-    currentSortDir.value = currentSortDir.value === "asc" ? "desc" : "asc";
+// 프로젝트 데이터 로드
+const loadProjects = async () => {
+  try {
+    const response = await axios.get("/get/adminProject");
+    projects.value = response.data;
+    console.log("프로젝트 목록 로드 성공:", response.data);
+  } catch (error) {
+    console.error("프로젝트 목록 로드 실패:", error);
   }
-  currentSort.value = s;
 };
 
-const sortedItems = computed(() => {
-  return [...items.value].sort((a, b) => {
-    let modifier = 1;
-    if (currentSortDir.value === "desc") modifier = -1;
-    if (a[currentSort.value] < b[currentSort.value]) return -1 * modifier;
-    if (a[currentSort.value] > b[currentSort.value]) return 1 * modifier;
-    return 0;
-  });
-});
+// const sort = (s) => {
+//   if (s === currentSort.value) {
+//     currentSortDir.value = currentSortDir.value === "asc" ? "desc" : "asc";
+//   }
+//   currentSort.value = s;
+// };
+
+// const sortedItems = computed(() => {
+//   return [...items.value].sort((a, b) => {
+//     let modifier = 1;
+//     if (currentSortDir.value === "desc") modifier = -1;
+//     if (a[currentSort.value] < b[currentSort.value]) return -1 * modifier;
+//     if (a[currentSort.value] > b[currentSort.value]) return 1 * modifier;
+//     return 0;
+//   });
+// });
 
 function clickEdit(index) {
   console.log("수정 index: " + index);
