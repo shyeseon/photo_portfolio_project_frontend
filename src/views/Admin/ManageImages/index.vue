@@ -130,7 +130,7 @@
           type="button"
           class="btn btn-danger"
           data-bs-dismiss="modal"
-          @click="deleteProject(currentItemNo.value)"
+          @click="deleteProject(currentItemNo)"
         >
           Delete
         </button>
