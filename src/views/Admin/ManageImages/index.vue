@@ -75,18 +75,19 @@
                   >
                     <button
                       class="btn btn-secondary img-edit-buttons btn-sm mb-1 w-50"
-                      @click="clickEdit(item.no)"
+                      @click="clickEdit(project.id)"
                     >
                       edit
                     </button>
                     <button
                       class="btn btn-danger img-edit-buttons btn-sm w-50"
-                      data-bs-toggle="modal"
-                      data-bs-target="#deleteModal"
-                      @click="clickDelete(item.no)"
+
+                      @click="clickDeleteModal(project.id)"
                     >
                       delete
                     </button>
+                    <!-- data-bs-toggle="modal"
+                    data-bs-target="#deleteModal" -->
                   </div>
                 </td>
               </tr>
@@ -126,13 +127,13 @@
               Cancel
             </button>
             <button
-              type="button"
-              class="btn btn-danger"
-              data-bs-dismiss="modal"
-              @click="clickDeleteConfirmModal"
-            >
-              Delete
-            </button>
+          type="button"
+          class="btn btn-danger"
+          data-bs-dismiss="modal"
+          @click="deleteProject(currentItemNo)"
+        >
+          Delete
+        </button>
           </div>
         </div>
       </div>
@@ -145,8 +146,9 @@ import { ref, computed, onMounted } from "vue";
 import Pagination from "./Pagination.vue";
 import axios from "axios";
 import "@/apis/axiosConfig";
+import { Modal } from "bootstrap";
 
-const currentItemNo = ref(0);
+const currentItemNo = ref(null);
 const currentSort = ref("");
 const currentSortDir = ref("asc");
 const projects = ref([]);
@@ -186,16 +188,28 @@ const loadProjects = async () => {
 function clickEdit(index) {
   console.log("수정 index: " + index);
 }
-function clickDelete(index) {
+
+// 프로젝트 삭제 모달
+function clickDeleteModal(index) {
+  console.log("project id in modal : " + index);
   currentItemNo.value = index;
+  console.log("currentItemNo : " + currentItemNo.value);
+  const deleteModal = new Modal(document.getElementById('deleteModal'));
+  deleteModal.show();
 }
-function clickDeleteConfirmModal() {
-  console.log("삭제하려는 프로젝트 값: " + currentItemNo.value);
 
-  //axios 통신 코드 작성 자리
+const deleteProject = async (id) => {
+  try {
+    console.log("project id in axios : " + id);
+    const response = await axios.delete(`/delete/project/${id}`);
+    console.log("프로젝트 삭제 성공:");
+    currentItemNo.value = null;
+    await loadProjects();
+  } catch (error) {
+    console.error("프로젝트 삭제 실패:", error);
+  }
+};
 
-  currentItemNo.value = 0;
-}
 </script>
 
 <style scoped>
