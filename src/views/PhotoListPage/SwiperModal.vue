@@ -7,7 +7,7 @@
         :initial-slide="initialSlide"
       >
         <swiper-slide v-for="(image, index) in images" :key="index">
-          <img :src="image.src" :alt="image.alt" class="fullscreen-image" />
+          <img :src="image.imageUrl" :alt="image.title" class="fullscreen-image" />
         </swiper-slide>
       </swiper>
       <!-- z-index를 높여 닫기 버튼이 항상 위에 오도록 설정 -->

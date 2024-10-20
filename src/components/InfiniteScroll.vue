@@ -31,11 +31,6 @@ onMounted(() => {
   if (observerTarget.value) {
     observer.observe(observerTarget.value);
   }
-
-  return () => {
-    if (observerTarget.value) {
-      observer.unobserve(observerTarget.value);
-    }
-  };
+  
 });
 </script>
