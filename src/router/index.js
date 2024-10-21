@@ -43,11 +43,14 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
 
   if(to.matched.some(record => record.meta.requiresAuth) && !store.state.id) {
-      next("/Admin/Login")
+      next({
+        path: "/Admin/Login",
+        query: { redirect: to.fullPath }
+      })
   } else {
     // 로그인 되어 있거나 인증이 필요 없는 경우 그대로 이동 
     next()
   }
-});
+}); 
 
 export default router;
