@@ -4,4 +4,5 @@ import axios from "axios";
 axios.defaults.baseURL = "http://localhost:8181/api";
 
 // withCredentials : 서로 다른 도메인에서 쿠키 & authorization 요청 허용 
-axios.defaults.withCredentials = true;
+axios.defaults.withCredentials = true;  
+export default axios;

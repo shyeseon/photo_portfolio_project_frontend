@@ -115,7 +115,6 @@ import { ref, onMounted } from "vue";
 import axios from "axios";
 import CategoryList from "./CategoryList.vue";
 import SubCategoryList from "./SubCategoryList.vue";
-import "@/apis/axiosConfig";
 
 const categories = ref([]);
 const initialCategories = ref([]); // 초기 상태를 저장하는 변수
