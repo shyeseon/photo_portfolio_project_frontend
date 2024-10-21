@@ -91,6 +91,8 @@ import { ref, onMounted } from "vue";
 import Pagination from "./Pagination.vue";
 import axios from "axios";
 import { Modal } from "bootstrap";
+import { useRouter } from "vue-router";
+const router = useRouter();
 
 const currentPage = ref(0);
 const pageSize = ref(5);
@@ -142,8 +144,10 @@ const sort = (sortField) => {
   loadProjects(); // 정렬 변경 후 데이터 로드
 };
 
+// EDIT 버튼 클릭 시 실행
 function clickEdit(index) {
   console.log("수정 index: " + index);
+  router.push(`AdminUpload/${index}`);
 }
 
 function clickDeleteModal(index) {

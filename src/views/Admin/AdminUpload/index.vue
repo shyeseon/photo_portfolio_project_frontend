@@ -155,11 +155,12 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import axios from "axios";
-import "@/apis/axiosConfig";
 import { useRouter, useRoute } from 'vue-router';
 import { useDropzone } from 'vue3-dropzone'; // drag And Drop을 위한 npm
-const route = useRoute();
+import "@/apis/axiosConfig";
+
 const router = useRouter();
+const route = useRoute();
 const selectedCategoryId = ref(); // 선택된 카테고리 아이디
 const selectedCategory = ref({}); // 선택된 카테고리 객체
 const selectedSubcategoryId = ref(); // 선택된 서브 카테고리 아이디
@@ -173,11 +174,27 @@ const photoMultipartFiles = ref([]); // 다중 이미지 사진
 const isLoading = ref(false); //스피너 사용을 위한 변수 선언
 
 onMounted(() => {
+  if(route.params.id) {
+    getProjectData();
+  }
   loadCategories(); // DOM 마운트 되었을시 카테고리 받아오는 로직 실행
 });
 
 
+// 프로젝트 데이터 로드
+const getProjectData = async () => {
+  if(route.params.id) {
+    try {
+      const response = await axios.get(`/get/adminProject/${route.params.id}`);
+      
+  
+      console.log("프로젝트 목록 로드 성공:", response.data);
+    } catch (error) {
+      console.error("프로젝트 목록 로드 실패:", error);
+    }
+  }
 
+};
 
 // 카테고리 선택시
 const handleCategoryChange = (selectedCategoryId) => {

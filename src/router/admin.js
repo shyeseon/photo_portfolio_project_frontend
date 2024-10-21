@@ -1,6 +1,6 @@
 const routes = [
     {
-        path: '/Admin/AdminUpload',
+        path: '/Admin/AdminUpload/:id?', 
         component: () => import (/* webpackChunkName: "Admin" */ '@/views/Admin/AdminUpload'),
         meta: { requiresAuth: true }
     },
