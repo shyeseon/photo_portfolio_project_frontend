@@ -1,7 +1,7 @@
 <template>
   <div class="d-flex h-100 w-100">
     <AdminSidebar />
-    <div class="main-content flex-grow-1 p-4 d-flex flex-column">
+    <div v-if="!isLoading" class="main-content flex-grow-1 p-4 d-flex flex-column">
       <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>add new projects</h2>
         <div>
@@ -145,6 +145,9 @@
         </div>
       </div>
     </div>
+    <div v-if="isLoading" class="spinner-border position-absolute top-50 start-50" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
   </div>
 </template>
 
@@ -166,10 +169,14 @@ const imageSrc = ref(null); // 썸네일 미리보기를 사용하기 위한
 const fileInfos = ref([]); // 파일 정보 배열 {미리보기, 이름, 사이즈, 타입}
 const thumbnailMultipartFile  = ref(null); // 썸네일 사진 
 const photoMultipartFiles = ref([]); // 다중 이미지 사진
+const isLoading = ref(false); //스피너 사용을 위한 변수 선언
 
 onMounted(() => {
   loadCategories(); // DOM 마운트 되었을시 카테고리 받아오는 로직 실행
 });
+
+
+
 
 // 카테고리 선택시
 const handleCategoryChange = (selectedCategoryId) => {
@@ -181,6 +188,7 @@ const handleCategoryChange = (selectedCategoryId) => {
 
 // 프로젝트 저장
 const savebtn = async() => {
+  isLoading.value = true; // 스피너 실행
   const formData = new FormData();
 
   // 이름 저장
@@ -206,8 +214,19 @@ const savebtn = async() => {
   console.log("서브카테고리 ID: " + selectedSubcategoryId.value);
   formData.append("subcategoryId", selectedSubcategoryId.value);
 
-  // 프로젝트 생성 요청
-  await axios.post("/create/project", formData);
+  try{
+    // 프로젝트 생성 요청
+    await axios.post("/create/project", formData);
+    // 페이지 이동
+    await router.push("ManageImages");
+
+  } catch (error){
+    console.log("Project error" + error)
+    alert("Project creation failed. Please try again");
+  } finally {
+    isLoading.value = false;
+  }
+  
 }
 
 // 카테고리 데이터 불러오기
