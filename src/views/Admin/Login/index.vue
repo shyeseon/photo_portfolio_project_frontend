@@ -75,12 +75,12 @@ const handleLoginSubmit = async () => {
     const formData = new FormData();
     formData.append("id", admin.value.id);
     formData.append("password", admin.value.password);
-    
+
     await store.dispatch("login", formData);
-    
-    if(store.state.id) {
-      router.push("/Admin/ManageImages");
-    }
+
+    // 로그인 성공 후 원래 가려던 경로로 리다이렉트
+    const redirect = router.currentRoute.value.query.redirect || "/Admin/ManageImages";  // redirect 쿼리 또는 기본 경로
+    router.push(redirect);
 
   } catch (error) {
     // loginError.value = 

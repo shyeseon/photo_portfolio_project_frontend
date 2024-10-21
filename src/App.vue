@@ -59,7 +59,7 @@ import { Offcanvas } from "bootstrap";
 import Sidebar from "@/components/common/MainPageSidebar";
 import AdminSidebar from "@/components/AdminSidebar";
 import { useRoute } from "vue-router";
-
+import "@/apis/axiosConfig"; // axios 기본 설정을 전체 앱에 적용
 const route = useRoute();
 
 const check = computed(() => route.path.toLowerCase().includes("/admin"));
