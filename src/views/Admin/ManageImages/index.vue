@@ -2,11 +2,23 @@
   <div class="admin-container d-flex container-fluid p-0">
     <div class="admin-content flex-grow-1">
       <div class="manage-category">
-        <h3 class="bg-dark text-white p-3 ps-4 mb-4 fw-bold pe-none">Manage Projects</h3>
-        <div class="manage-image-padding">
-          <div class="d-flex justify-content-end align-items-center">
-            <RouterLink class="btn btn-primary" to="/Admin/AdminUpload">Create Project</RouterLink>
-          </div>
+        <h3 class="bg-dark text-white p-3 ps-4 mb-4 fw-bold pe-none">
+          Manage Projects
+        </h3>
+
+        <!-- 검색 입력 필드와 검색 버튼 추가 -->
+        <div class="manage-image-padding mb-3 d-flex">
+          <input
+            type="text"
+            v-model="searchKeyword"
+            placeholder="Search by project title"
+            class="form-control w-25 me-2"
+          />
+          <button class="btn btn-primary" @click="handleSearch">Search</button>
+        </div>
+
+        <!-- 검색 결과가 있을 때와 없을 때를 처리 -->
+        <div v-if="projects.length">
           <table class="table table-hover text-center align-middle mt-4">
             <thead>
               <tr>
@@ -42,8 +54,14 @@
               </tr>
             </tbody>
           </table>
-          <Pagination :current-page="currentPage" :total-pages="totalPages" @page-changed="handlePageChange" />
         </div>
+
+        <!-- 검색 결과가 없을 때 메시지 출력 -->
+        <div v-else>
+          <p class="text-center text-muted">검색 결과 없음</p>
+        </div>
+
+        <Pagination :current-page="currentPage" :total-pages="totalPages" @page-changed="handlePageChange" />
       </div>
     </div>
 
@@ -68,7 +86,6 @@
   </div>
 </template>
 
-
 <script setup>
 import { ref, onMounted } from "vue";
 import Pagination from "./Pagination.vue";
@@ -82,6 +99,7 @@ const projects = ref([]);
 const currentSort = ref("id"); // 기본 정렬 기준
 const currentSortDir = ref("desc"); // 기본 정렬 방향
 const currentItemNo = ref(null);
+const searchKeyword = ref(''); // 검색 키워드
 
 onMounted(() => {
   loadProjects();
@@ -96,6 +114,7 @@ const loadProjects = async () => {
         size: pageSize.value,
         sort: currentSort.value, // 정렬 기준
         direction: currentSortDir.value, // 정렬 방향
+        keyWord: searchKeyword.value, // 검색 키워드
       },
     });
     projects.value = response.data.content;
@@ -104,6 +123,12 @@ const loadProjects = async () => {
   } catch (error) {
     console.error("프로젝트 목록 로드 실패:", error);
   }
+};
+
+// 검색 처리 함수
+const handleSearch = () => {
+  currentPage.value = 0; // 검색 시 첫 페이지로 초기화
+  loadProjects(); // 검색 키워드로 프로젝트 목록 재로드
 };
 
 // 정렬 처리
