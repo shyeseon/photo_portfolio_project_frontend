@@ -172,6 +172,7 @@ const fileInfos = ref([]); // 파일 정보 배열 {미리보기, 이름, 사이
 const thumbnailMultipartFile  = ref(null); // 썸네일 사진 
 const photoMultipartFiles = ref([]); // 다중 이미지 사진
 const isLoading = ref(false); //스피너 사용을 위한 변수 선언
+const deletedPhotoIds = ref([]); // 삭제된 사진의 id 목록
 
 onMounted(async () => {
   await loadCategories(); // DOM 마운트 되었을시 카테고리 받아오는 로직 실행
@@ -194,10 +195,10 @@ const getProjectData = async () => {
       selectedSubcategoryId.value = projectData.subCategoryId;
 
       imageSrc.value = projectData.imageUrl;
-      projectData.photos.forEach(
-        url => {
+      projectData.photos.forEach(photo => {
           fileInfos.value.push({
-            preview:url
+            id: photo.id,
+            preview:photo.imageUrl
           })
         }
       )
@@ -220,11 +221,7 @@ const handleCategoryChange = (selectedCategoryId) => {
       selectedSubcategories.value = selectedCategory.value.subCategories;
 }
 
-watch(selectedCategoryId, (newVal) => {
-  if (newVal) {
-    handleCategoryChange(newVal);
-  }
-});
+
 
 // 프로젝트 저장
 const savebtn = async() => {
@@ -236,15 +233,24 @@ const savebtn = async() => {
   formData.append("title", projectName.value);
 
   // 썸네일 파일 저장
-  console.log("썸네일 사진: " + thumbnailMultipartFile.value);
-  formData.append("thumbnailMultipartFile", thumbnailMultipartFile.value);
-
-  // 포토 파일 저장
-  for(let i = 0; i<photoMultipartFiles.value.length; i++){
-    formData.append("photoMultipartFiles",photoMultipartFiles.value[i]);
-    console.log("사진" + i +":" +photoMultipartFiles.value[i]);
+  if(thumbnailMultipartFile.value) {
+    console.log("썸네일 사진: " + thumbnailMultipartFile.value);
+    formData.append("thumbnailMultipartFile", thumbnailMultipartFile.value);
   }
-  console.log("사진들: "+photoMultipartFiles.value)
+
+  if(photoMultipartFiles.value.length > 0) {
+    // 포토 파일 저장
+    for(let i = 0; i<photoMultipartFiles.value.length; i++){
+      formData.append("photoMultipartFiles",photoMultipartFiles.value[i]);
+    }
+    console.log("사진들: "+photoMultipartFiles.value)
+  }
+
+  if(deletedPhotoIds.value.length > 0) {
+    deletedPhotoIds.value.forEach((id, index) => {
+      formData.append(`deletedPhotoIds[${index}]`, id);
+    });
+  }
 
   // 선택된 카테고리
   console.log("선택된 카테고리 Id: " + selectedCategoryId.value);
@@ -262,7 +268,7 @@ const savebtn = async() => {
       await axios.post("/create/project", formData);
     }
     // 페이지 이동
-    await router.push("ManageImages");
+    await router.push("/Admin/ManageImages");
 
   } catch (error){
     console.log("Project error" + error)
@@ -305,6 +311,11 @@ const changeMB = (size) => {
 }
 
 const removeFile = (index) => {
+  const file = fileInfos.value[index];
+  if (file.id) {
+    deletedPhotoIds.value.push(file.id); // 삭제된 사진의 ID 저장
+    console.log("삭제된 id : " + file.id);
+  }
   fileInfos.value.splice(index,1);
   photoMultipartFiles.value.splice(index, 1);
 }
