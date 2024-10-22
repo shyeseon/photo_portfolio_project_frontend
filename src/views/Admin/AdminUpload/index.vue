@@ -153,7 +153,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted } from 'vue';
 import axios from "axios";
 import { useRouter, useRoute } from 'vue-router';
 import { useDropzone } from 'vue3-dropzone'; // drag And Drop을 위한 npm
@@ -175,10 +175,12 @@ const isLoading = ref(false); //스피너 사용을 위한 변수 선언
 const deletedPhotoIds = ref([]); // 삭제된 사진의 id 목록
 
 onMounted(async () => {
+  isLoading.value = true;
   await loadCategories(); // DOM 마운트 되었을시 카테고리 받아오는 로직 실행
   if(route.params.id) {
     await getProjectData();
   }
+  isLoading.value = false;
 });
 
 
