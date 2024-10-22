@@ -46,7 +46,7 @@ import { Modal } from 'bootstrap';
 import InfiniteScroll from '@/components/InfiniteScroll.vue';
 import axios from 'axios';
 import {  useRoute, useRouter } from 'vue-router';
-import "@/apis/axiosConfig";
+
 
 const route = useRoute();
 const router = useRouter();
@@ -67,7 +67,6 @@ const loadedImages = ref(0);
 const width = ref(window.innerWidth);
 
 const id = ref(null);
-id.value = route.query.projectId;
 const title = ref(null);
 
 //let projectCategory = ref(listImages.value[0].pc);
@@ -90,8 +89,10 @@ const loadMoreItems = async () => {
   }
 
   try {
+    id.value = route.params.projectId;
     const response = await axios.get(`/photos/${id.value}`,{params});
     console.log(response.data)
+    //newImages.value를 받아와서 넣어주는 부분을 else문과 합칠 수 있을 것 같다
     newImages.value = response.data.map((item,index) =>({
       id:item.id,
       imageUrl:item.imageUrl,
@@ -155,6 +156,8 @@ const columnHeights = Array(columnsCount.value).fill(0);
 //이미지가 로딩 되기 전 레이아웃 배치가 이루어 지지 않도록 이미지를 모두 불러오기
 const preloadAndSortImages = async () => {
   //모든 이미지가 로딩되기 전에 distribute함수가 호출되면 에러가 발생하므로 promise를 사용해 모든 이미지가 로딩되고 함수가 실행하도록 함 
+
+  //의문??? => axios를 사용하는데 promise를 사용해야 하나??
 const loadedImages = await Promise.all(listImages.value.map(async (image) => {
   return new Promise((resolve) => {
    //이미지의 높이를 계산하기 위해 이미지 객체를 생성해 src를 할당해 줘야 이미지가 출력됨
@@ -189,27 +192,28 @@ async function modalOpen(index) {
   } else {
     showSwiperModal.value = true; // 모바일에서 Swiper 모달 열기
   }
-  }catch{
-    console.error("모달 로드 실패"+Error);
+  }catch(error){
+    console.error("모달 로드 실패"+error);
   }
 
 }
 
-function closeModal() {
+const closeModal = () => {
   if (!isMobile.value) {
     console.log("모달 닫기");
     ImageDetailmodal.hide();
   }
 }
 
-function closeSwiperModal() {
+const closeSwiperModal = () => {
   console.log("Swiper 모달 닫기");
   showSwiperModal.value = false; // Swiper 모달 닫기
 }
 
-function routerBack(){
-  router.back(-1);
+const routerBack = () => {
+  router.back();
 }
+
 watch(listImages, () => {
   distributeItems();
   loadedImages.value = 0;

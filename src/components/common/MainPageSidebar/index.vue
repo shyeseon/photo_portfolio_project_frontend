@@ -29,8 +29,14 @@
           >
             <div class="accordion-body pt-0 mb-3">
               <ul class="nav flex-column">
+                <li class="nav-item">
+                  <RouterLink class="nav-link" to="/" @click="menuItemClicked"
+                    >All</RouterLink
+                  >
+                </li>
                 <li class="nav-item" v-for="(category) in categories" :key="category.id">
-                  <RouterLink class="nav-link"  :to="`/PhotoListPage/PhotoList.vue?categoryId=${category.id}`" @click="menuItemClicked">{{ category.name }}</RouterLink>
+                  <RouterLink class="nav-link"  :to="{ name: 'photoList', params: { categoryId: category.id} }" 
+                  @click="menuItemClicked">{{ category.name }}</RouterLink>
                 </li>
               </ul>
             </div>

@@ -1,7 +1,7 @@
 <template>
   <div class="photo-gallery">
     <div class="d-flex flex-wrap  mb-5 mt-4">
-  <div v-for="category in subCategory" :key="category.index">
+  <div v-for="category in subCategory" :key="category.id">
     <button @click="selectedCategory(category.id)" class="btn border-0 p-2">
       <h4 class="mb-0">{{ category.subName }}
       <span v-if="category.index !== subCategory.length"> / </span>
@@ -12,7 +12,7 @@
 <div v-if="projects.length===0 && !isLoading" class="position-absolute top-50 start-50 fw-bold fs-5">Projects not found</div>
     <div class="row row-cols-1 row-cols-md-3 g-4 mt-5">
       <div v-for="project in projects" :key="project.id" class="col">
-        <RouterLink :to="`/PhotoListPage/DetailList.vue?projectId=${project.id}`" class="card h-100 border-0 text-decoration-none">
+        <RouterLink :to="{ name: 'DetailList', params: { projectId: project.id } }" class="card h-100 border-0 text-decoration-none">
           <div class="skeleton_loading" v-if="!project.imageLoaded  ">
             <div class="skeleton_img w-100 h-100"></div>
           </div>
@@ -35,7 +35,6 @@
 import axios from "axios";
 import {  onMounted, ref, watch } from "vue";
 import InfiniteScroll from '@/components/InfiniteScroll.vue';
-import "@/apis/axiosConfig";
 import { useRoute, useRouter } from "vue-router";
 const route = useRoute();
 const router = useRouter();
@@ -48,17 +47,17 @@ const projects = ref([]);
 const newImages= ref([])
 const categoryId = ref(null);
 const subCategoryId =ref(null);
-categoryId.value= route.query.categoryId;
 
 const subCategory = ref([])
 
 onMounted(()=>{
   if(categoryId.value!=null){
   getSubCategory();
+  loadMoreItems();
 }
 })
 
-
+categoryId.value= route.params.categoryId;
 const getSubCategory = async() =>{
   try{
     const response = await axios.get(`/subCategory/${categoryId.value}`);
@@ -66,13 +65,10 @@ const getSubCategory = async() =>{
       id:sub.id,
       subName:sub.name
     }));
-  }catch{
-    console.error("subCategory 로드 실패 "+Error)
+  }catch (error){
+    console.error("subCategory 로드 실패 "+error);
   }
 }
-onMounted(()=>{
-  loadMoreItems();
-})
 
 const loadMoreItems = async () => {
   console.log("실행")
@@ -116,7 +112,8 @@ const selectedCategory = (categoryName) => {
     console.log("none")
   } else {
     subCategoryId.value = selectCategory.value;
-    router.push(`/PhotoListPage/PhotoList.vue?categoryId=${categoryId.value}&&subCategoryId=${subCategoryId.value}`)
+    //해결 해야 할 문제 => 카테고리 클릭 시 계속 router push로 계속 보내면 안됨
+    router.push({ name: 'photoList', params: { categoryId: categoryId.value, subCategoryId:subCategoryId.value } })
     projects.value = [];
     page.value = 0;
     hasMore.value = true;
@@ -133,7 +130,7 @@ const onImageLoad = (projectId) => {
 };
 
 watch(route, (newRoute)=>{
-    categoryId.value=newRoute.query.categoryId;
+    categoryId.value=newRoute.params.categoryId;
     subCategoryId.value=null;
     projects.value = [];
     page.value = 0;
