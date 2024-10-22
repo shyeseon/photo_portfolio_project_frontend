@@ -186,11 +186,23 @@ const getProjectData = async () => {
   if(route.params.id) {
     try {
       const response = await axios.get(`/get/adminProject/${route.params.id}`);
-      
-  
-      console.log("프로젝트 목록 로드 성공:", response.data);
+      const projectData = response.data;
+
+      projectName.value = projectData.title;
+      selectedCategoryId.value = projectData.categoryId;
+      selectedSubcategoryId.value = projectData.subCategoryId;
+      imageSrc.value = projectData.imageUrl;
+      projectData.photos.forEach(
+        url => {
+          fileInfos.value.push({
+            preview:url
+          })
+        }
+      )
+
+      console.log("프로젝트 데이터 로드 성공:", response.data);
     } catch (error) {
-      console.error("프로젝트 목록 로드 실패:", error);
+      console.error("프로젝트 데이터 로드 실패:", error);
     }
   }
 
@@ -233,8 +245,12 @@ const savebtn = async() => {
   formData.append("subcategoryId", selectedSubcategoryId.value);
 
   try{
-    // 프로젝트 생성 요청
-    await axios.post("/create/project", formData);
+    if(route.params.id) { // 프로젝트 수정 요청
+      await axios.put(`/update/project/${route.params.id}`, formData);
+      console.log("프로젝트 수정 완료")
+    } else { // 프로젝트 생성 요청
+      await axios.post("/create/project", formData);
+    }
     // 페이지 이동
     await router.push("ManageImages");
 
