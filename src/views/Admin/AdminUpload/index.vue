@@ -246,6 +246,7 @@ const savebtn = async() => {
     console.log("사진들: "+photoMultipartFiles.value)
   }
 
+  // 기존 사진 중 삭제된 사진 id
   if(deletedPhotoIds.value.length > 0) {
     deletedPhotoIds.value.forEach((id, index) => {
       formData.append(`deletedPhotoIds[${index}]`, id);
@@ -310,6 +311,7 @@ const changeMB = (size) => {
   return (size.toFixed(3)) + " MB";
 }
 
+// 사진 삭제
 const removeFile = (index) => {
   const file = fileInfos.value[index];
   if (file.id) {
@@ -329,7 +331,6 @@ const FirstFileUpload = (file) => {
   reader.onloadend = () => { // 파일 읽기가 완료되면 콜백되는 함수
     const base64 = reader.result; // 읽은 값을 얻을 수 있음
     imageSrc.value = base64; // 미리보기를 위해 base64 파일을 저장
-    console.log("base64", base64); // Base64 데이터 출력
   };
 
   // 비동기적으로 읽기 시작 base64 -> URL로 변환 
@@ -403,7 +404,6 @@ const MultiFileUpload = (files) => {
       const reader = new FileReader();
       reader.onloadend = () => { // 파일 읽기가 완료되면 콜백되는 함수
       const base64 = reader.result; // 읽은 값을 얻을 수 있음
-      console.log("base64", base64); // Base64 데이터 
       fileInfos.value.push({
         preview : base64,
         name: file.name,
