@@ -117,7 +117,7 @@
               <div class="mb-3" v-for="(file, index) in fileInfos" :key="file.name">
                 <div class="d-flex justify-content-between align-items-center mb-1">
                   <div class="d-flex align-items-center flex-grow-1 me-3">
-                    <img :src="file.preview" alt="preview" class="me-2" style="width: 40px; height: 40px; object-fit: cover;" />
+                    <img :src="file.preview" alt="preview" class="me-2" style="width: 60px; height: 60px; object-fit: cover;" />
                     <span class="truncate" style="max-width: 150px;">{{ file.name }}</span>
                   </div>
                   <div class="d-flex align-items-center">
