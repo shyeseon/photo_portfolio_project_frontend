@@ -153,14 +153,14 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import axios from "axios";
 import { useRouter, useRoute } from 'vue-router';
 import { useDropzone } from 'vue3-dropzone'; // drag And Drop을 위한 npm
 import "@/apis/axiosConfig";
-
 const router = useRouter();
 const route = useRoute();
+
 const selectedCategoryId = ref(); // 선택된 카테고리 아이디
 const selectedCategory = ref({}); // 선택된 카테고리 객체
 const selectedSubcategoryId = ref(); // 선택된 서브 카테고리 아이디
@@ -173,11 +173,11 @@ const thumbnailMultipartFile  = ref(null); // 썸네일 사진
 const photoMultipartFiles = ref([]); // 다중 이미지 사진
 const isLoading = ref(false); //스피너 사용을 위한 변수 선언
 
-onMounted(() => {
+onMounted(async () => {
+  await loadCategories(); // DOM 마운트 되었을시 카테고리 받아오는 로직 실행
   if(route.params.id) {
-    getProjectData();
+    await getProjectData();
   }
-  loadCategories(); // DOM 마운트 되었을시 카테고리 받아오는 로직 실행
 });
 
 
@@ -190,7 +190,9 @@ const getProjectData = async () => {
 
       projectName.value = projectData.title;
       selectedCategoryId.value = projectData.categoryId;
+      handleCategoryChange(selectedCategoryId.value);
       selectedSubcategoryId.value = projectData.subCategoryId;
+
       imageSrc.value = projectData.imageUrl;
       projectData.photos.forEach(
         url => {
@@ -213,8 +215,16 @@ const handleCategoryChange = (selectedCategoryId) => {
   console.log("카테고리 id: " + selectedCategoryId)
   // 선택된 카테고리의 서브 카테고리만 보이도록 저장
   selectedCategory.value = categories.value.find((cate) => cate.id === selectedCategoryId);
-  selectedSubcategories.value = selectedCategory.value.subCategories;
+    // 선택된 카테고리가 있고 subCategories 속성이 존재하는지 확인 후 설정
+      console.log("서브 카테고리 목록:", selectedCategory.value.subCategories);
+      selectedSubcategories.value = selectedCategory.value.subCategories;
 }
+
+watch(selectedCategoryId, (newVal) => {
+  if (newVal) {
+    handleCategoryChange(newVal);
+  }
+});
 
 // 프로젝트 저장
 const savebtn = async() => {
