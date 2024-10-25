@@ -3,7 +3,8 @@
     <AdminSidebar />
     <div v-if="!isLoading" class="main-content flex-grow-1 p-4 d-flex flex-column">
       <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>add new projects</h2>
+        <h2 v-if="route.params.id">edit projects</h2>
+        <h2 v-else>add new projects</h2>
         <div>
           <button class="btn btn-primary me-2" @click="savebtn">save</button>
           <button class="btn btn-outline-secondary" @click="cancelbtn">cancel</button>
@@ -116,7 +117,7 @@
               <div class="mb-3" v-for="(file, index) in fileInfos" :key="file.name">
                 <div class="d-flex justify-content-between align-items-center mb-1">
                   <div class="d-flex align-items-center flex-grow-1 me-3">
-                    <img :src="file.preview" alt="preview" class="me-2" style="width: 40px; height: 40px; object-fit: cover;" />
+                    <img :src="file.preview" alt="preview" class="me-2" style="width: 60px; height: 60px; object-fit: cover;" />
                     <span class="truncate" style="max-width: 150px;">{{ file.name }}</span>
                   </div>
                   <div class="d-flex align-items-center">
@@ -154,11 +155,12 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import axios from "axios";
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { useDropzone } from 'vue3-dropzone'; // drag And Drop을 위한 npm
 import "@/apis/axiosConfig";
-
 const router = useRouter();
+const route = useRoute();
+
 const selectedCategoryId = ref(); // 선택된 카테고리 아이디
 const selectedCategory = ref({}); // 선택된 카테고리 객체
 const selectedSubcategoryId = ref(); // 선택된 서브 카테고리 아이디
@@ -170,21 +172,58 @@ const fileInfos = ref([]); // 파일 정보 배열 {미리보기, 이름, 사이
 const thumbnailMultipartFile  = ref(null); // 썸네일 사진 
 const photoMultipartFiles = ref([]); // 다중 이미지 사진
 const isLoading = ref(false); //스피너 사용을 위한 변수 선언
+const deletedPhotoIds = ref([]); // 삭제된 사진의 id 목록
 
-onMounted(() => {
-  loadCategories(); // DOM 마운트 되었을시 카테고리 받아오는 로직 실행
+onMounted(async () => {
+  isLoading.value = true;
+  await loadCategories(); // DOM 마운트 되었을시 카테고리 받아오는 로직 실행
+  if(route.params.id) {
+    await getProjectData();
+  }
+  isLoading.value = false;
 });
 
 
+// 프로젝트 데이터 로드
+const getProjectData = async () => {
+  if(route.params.id) {
+    try {
+      const response = await axios.get(`/get/adminProject/${route.params.id}`);
+      const projectData = response.data;
 
+      projectName.value = projectData.title;
+      selectedCategoryId.value = projectData.categoryId;
+      handleCategoryChange(selectedCategoryId.value);
+      selectedSubcategoryId.value = projectData.subCategoryId;
+
+      imageSrc.value = projectData.imageUrl;
+      projectData.photos.forEach(photo => {
+          fileInfos.value.push({
+            id: photo.id,
+            preview:photo.imageUrl
+          })
+        }
+      )
+
+      console.log("프로젝트 데이터 로드 성공:", response.data);
+    } catch (error) {
+      console.error("프로젝트 데이터 로드 실패:", error);
+    }
+  }
+
+};
 
 // 카테고리 선택시
 const handleCategoryChange = (selectedCategoryId) => {
   console.log("카테고리 id: " + selectedCategoryId)
   // 선택된 카테고리의 서브 카테고리만 보이도록 저장
   selectedCategory.value = categories.value.find((cate) => cate.id === selectedCategoryId);
-  selectedSubcategories.value = selectedCategory.value.subCategories;
+    // 선택된 카테고리가 있고 subCategories 속성이 존재하는지 확인 후 설정
+      console.log("서브 카테고리 목록:", selectedCategory.value.subCategories);
+      selectedSubcategories.value = selectedCategory.value.subCategories;
 }
+
+
 
 // 프로젝트 저장
 const savebtn = async() => {
@@ -196,15 +235,25 @@ const savebtn = async() => {
   formData.append("title", projectName.value);
 
   // 썸네일 파일 저장
-  console.log("썸네일 사진: " + thumbnailMultipartFile.value);
-  formData.append("thumbnailMultipartFile", thumbnailMultipartFile.value);
-
-  // 포토 파일 저장
-  for(let i = 0; i<photoMultipartFiles.value.length; i++){
-    formData.append("photoMultipartFiles",photoMultipartFiles.value[i]);
-    console.log("사진" + i +":" +photoMultipartFiles.value[i]);
+  if(thumbnailMultipartFile.value) {
+    console.log("썸네일 사진: " + thumbnailMultipartFile.value);
+    formData.append("thumbnailMultipartFile", thumbnailMultipartFile.value);
   }
-  console.log("사진들: "+photoMultipartFiles.value)
+
+  if(photoMultipartFiles.value.length > 0) {
+    // 포토 파일 저장
+    for(let i = 0; i<photoMultipartFiles.value.length; i++){
+      formData.append("photoMultipartFiles",photoMultipartFiles.value[i]);
+    }
+    console.log("사진들: "+photoMultipartFiles.value)
+  }
+
+  // 기존 사진 중 삭제된 사진 id
+  if(deletedPhotoIds.value.length > 0) {
+    deletedPhotoIds.value.forEach((id, index) => {
+      formData.append(`deletedPhotoIds[${index}]`, id);
+    });
+  }
 
   // 선택된 카테고리
   console.log("선택된 카테고리 Id: " + selectedCategoryId.value);
@@ -215,10 +264,14 @@ const savebtn = async() => {
   formData.append("subcategoryId", selectedSubcategoryId.value);
 
   try{
-    // 프로젝트 생성 요청
-    await axios.post("/create/project", formData);
+    if(route.params.id) { // 프로젝트 수정 요청
+      await axios.put(`/update/project/${route.params.id}`, formData);
+      console.log("프로젝트 수정 완료")
+    } else { // 프로젝트 생성 요청
+      await axios.post("/create/project", formData);
+    }
     // 페이지 이동
-    await router.push("ManageImages");
+    await router.push("/Admin/ManageImages");
 
   } catch (error){
     console.log("Project error" + error)
@@ -260,7 +313,13 @@ const changeMB = (size) => {
   return (size.toFixed(3)) + " MB";
 }
 
+// 사진 삭제
 const removeFile = (index) => {
+  const file = fileInfos.value[index];
+  if (file.id) {
+    deletedPhotoIds.value.push(file.id); // 삭제된 사진의 ID 저장
+    console.log("삭제된 id : " + file.id);
+  }
   fileInfos.value.splice(index,1);
   photoMultipartFiles.value.splice(index, 1);
 }
@@ -274,7 +333,6 @@ const FirstFileUpload = (file) => {
   reader.onloadend = () => { // 파일 읽기가 완료되면 콜백되는 함수
     const base64 = reader.result; // 읽은 값을 얻을 수 있음
     imageSrc.value = base64; // 미리보기를 위해 base64 파일을 저장
-    console.log("base64", base64); // Base64 데이터 출력
   };
 
   // 비동기적으로 읽기 시작 base64 -> URL로 변환 
@@ -348,7 +406,6 @@ const MultiFileUpload = (files) => {
       const reader = new FileReader();
       reader.onloadend = () => { // 파일 읽기가 완료되면 콜백되는 함수
       const base64 = reader.result; // 읽은 값을 얻을 수 있음
-      console.log("base64", base64); // Base64 데이터 
       fileInfos.value.push({
         preview : base64,
         name: file.name,
