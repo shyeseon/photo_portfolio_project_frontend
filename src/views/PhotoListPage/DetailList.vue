@@ -8,7 +8,7 @@
         <h4 class="fw-bold mb-0 me-3">{{ title }}</h4>
       </div>
       <div class="d-flex justify-content-center">
-        <div v-if="isLoading"  class="spinner-border position-absolute top-50 start-50" role="status">
+        <div v-if="isLoading && page==0"  class="spinner-border position-absolute top-50 start-50" role="status">
           <span class="visually-hidden">Loading...</span>
         </div>
       </div>
