@@ -27,6 +27,13 @@
               >Manage Category</RouterLink
             >
           </li>
+          <li class="nav-item mt-5">
+            <RouterLink
+              class="nav-link text-white btn btn-dark p-2"
+              to="/"
+              >Quit</RouterLink
+            >
+          </li>
         </ul>
       </div>
     </div>

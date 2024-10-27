@@ -29,10 +29,10 @@
                 <li class="nav-item">
                   <RouterLink class="nav-link" to="/" @click="menuItemClicked">All</RouterLink>
                 </li>
-                <li class="nav-item" v-for="(category) in categories" :key="category.id">
+                <li class="nav-item" v-for="category in categories" :key="category.id">
                   <RouterLink
                     class="nav-link"
-                    :to="{ name: 'photoList', params: { categoryId: category.id } }"
+                    :to="{ name: 'photoList', params: { categoryId: category.id }}"
                     @click="menuItemClicked"
                   >{{ category.name }}</RouterLink>
                 </li>
@@ -48,6 +48,10 @@
         <li class="nav-item">
           <RouterLink class="nav-link mb-3" to="/contact" @click="menuItemClicked">Contact</RouterLink>
         </li>
+        <!-- Admin 메뉴 항목 표시 -->
+        <li class="nav-item" v-if="isAdmin!=`anonymousUser`">
+          <RouterLink class="nav-link mb-3" to="/Admin/ManageImages" @click="menuItemClicked">Admin</RouterLink>
+        </li>
       </ul>
       <div class="mt-3 ms-3 mb-3">
         <a href="https://www.instagram.com/" class="sns-link text-dark"><i class="fa-brands fa-instagram me-3"></i></a>
@@ -58,36 +62,48 @@
 </template>
 
 <script setup>
-import axios from 'axios';
-import { ref, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import axios from "axios";
+import { ref, onMounted } from "vue";
+import { useRoute } from "vue-router";
 
 const categories = ref([]);
+const isAdmin = ref(false); // 관리자인지 여부를 저장
 const route = useRoute();
 
 // 페이지에 따라 적절한 카테고리를 가져오는 함수
 const getCategory = async () => {
   try {
-    const viewParam = route.name === 'admin' ? 'admin' : 'main';
-    const response = await axios.get(`/get/categories`, {
-      params: { view: viewParam }
-    });
-    categories.value = response.data.map(category => ({
+    const viewParam = route.name === "admin" ? "admin" : "main";
+    const response = await axios.get(`/get/categories`, { params: { view: viewParam } });
+    categories.value = response.data.map((category) => ({
       id: category.id,
-      name: category.name
+      name: category.name,
     }));
   } catch (error) {
     console.error("카테고리 로드 실패:", error);
   }
 };
 
+// 세션 확인 함수
+const checkSession = async () => {
+  try {
+    const response = await axios.get("/check-session");
+    isAdmin.value = response.data.isAdmin; // 관리자 여부를 isAdmin 변수에 저장
+  } catch (error) {
+    console.error("세션 확인 실패:", error);
+  }
+};
 
-onMounted(getCategory);
+// 페이지가 로드될 때 세션을 확인하고 카테고리를 가져옵니다.
+onMounted(async () => {
+  await checkSession();
+  await getCategory();
+});
 
-const emit = defineEmits(['menuItemClicked']);
+const emit = defineEmits(["menuItemClicked"]);
 
 function menuItemClicked() {
-  emit('menuItemClicked');
+  emit("menuItemClicked");
 }
 </script>
 
