@@ -127,10 +127,9 @@ const isDeleteModalVisible = ref(false);
 // 카테고리 데이터 로드
 const loadCategories = async () => {
   try {
-    const response = await axios.get("/categories");
+    const response = await axios.get("/get/categories");
     categories.value = response.data; // 백엔드에서 받은 카테고리 데이터를 할당
     initialCategories.value = JSON.parse(JSON.stringify(response.data)); // 데이터를 복사해서 초기 상태로 저장
-    console.log("카테고리 목록 로드 성공:", response.data);
   } catch (error) {
     console.error("카테고리 목록 로드 실패:", error);
   }

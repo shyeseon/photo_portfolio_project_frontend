@@ -286,7 +286,7 @@ const savebtn = async() => {
 const loadCategories = async () => {
   try {
     // 카테고리 요청
-    const response = await axios.get("/categories");
+    const response = await axios.get("/get/categories");
     // 받아온 카테고리 저장
     categories.value = response.data;
     // initialCategories.value = JSON.parse(JSON.stringify(response.data)); // 데이터를 복사해서 초기 상태로 저장
