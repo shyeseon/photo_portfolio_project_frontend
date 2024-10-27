@@ -1,5 +1,5 @@
 <template>
-  <nav class="sidebar p-0 w-100 h-100 ">
+  <nav class="sidebar p-0 w-100 h-100">
     <!-- 사이드바 -->
     <div class="h-100 side-bar bg-black text-center d-flex flex-column">
       <div class="mt-5 flex-grow-0 sticky-top">

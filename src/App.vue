@@ -43,7 +43,7 @@
         </div>
         <div class="offcanvas-body">
           <Sidebar v-if="!check" @menuItemClicked="closeOffcanvas" />
-          <AdminSidebar v-if="check"/>
+          <AdminSidebar v-if="check" class="h-100 bg-black"/>
         </div>
       </div>
 
@@ -92,6 +92,7 @@ function closeOffcanvas() {
 
 .sidebar {
   width: 250px;
+  min-height: 100vh;
 }
 
 @media screen and (max-width: 768px) {
