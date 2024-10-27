@@ -143,4 +143,11 @@ watch(
 .modal {
   backdrop-filter: brightness(0.5);
 }
+.closeBtn{
+  cursor: pointer;
+}
+.closeBtn:hover::before {
+  color: rgb(100, 220, 220);
+  transition: .3s ease;
+}
 </style>
