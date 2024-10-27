@@ -43,27 +43,69 @@
             <table class="table table-hover text-center align-middle mt-4">
               <thead>
                 <tr>
-                  <th @click="sort('id')" class="category col-md-1">No</th>
-                  <th class="thumbnail">Thumbnail</th>
+                  <th @click="sort('id')" class="category col-md-1 sort-button">
+                    No
+                    <i
+                      v-if="currentSort === 'id'"
+                      :class="
+                        currentSortDir === 'asc'
+                          ? 'fa fa-arrow-up'
+                          : 'fa fa-arrow-down'
+                      "
+                    ></i>
+                  </th>
+                  <th class="thumbnail none-sort-button">Thumbnail</th>
                   <th
                     @click="sort('title')"
-                    class="category col-md-3 text-center"
+                    class="category col-md-3 text-center sort-button"
                   >
                     Project name
+                    <i
+                      v-if="currentSort === 'title'"
+                      :class="
+                        currentSortDir === 'asc'
+                          ? 'fa fa-arrow-up'
+                          : 'fa fa-arrow-down'
+                      "
+                    ></i>
                   </th>
-                  <th
-                    @click="sort('categoryName')"
-                    class="category col-md-2 text-center"
-                  >
+                  <th class="category col-md-2 text-center none-sort-button">
                     Category
                   </th>
-                  <th @click="sort('createdAt')" class="category col-md-1">
+                  <th
+                    @click="sort('createdAt')"
+                    class="category col-md-1 sort-button"
+                  >
                     Date
+                    <i
+                      v-if="currentSort === 'createdAt'"
+                      :class="
+                        currentSortDir === 'asc'
+                          ? 'fa fa-arrow-up'
+                          : 'fa fa-arrow-down'
+                      "
+                    ></i>
                   </th>
-                  <th @click="sort('imageCount')" class="category col-md-1">
+                  <th
+                    @click="sort('imageCount')"
+                    class="category col-md-1 none-sort-button"
+                  >
                     Images
                   </th>
-                  <th @click="sort('view')" class="category col-md-1">Views</th>
+                  <th
+                    @click="sort('view')"
+                    class="category col-md-1 sort-button"
+                  >
+                    Views
+                    <i
+                      v-if="currentSort === 'view'"
+                      :class="
+                        currentSortDir === 'asc'
+                          ? 'fa fa-arrow-up'
+                          : 'fa fa-arrow-down'
+                      "
+                    ></i>
+                  </th>
                   <th class="col-md-2"></th>
                 </tr>
               </thead>
@@ -270,5 +312,11 @@ const handlePageChange = (newPage) => {
   left: 55%;
   transform: translate(-50%, -50%);
   z-index: 10; /* 필요에 따라 z-index 조정 */
+}
+.sort-button {
+  cursor: pointer;
+}
+.none-sort-button {
+  cursor: default;
 }
 </style>
