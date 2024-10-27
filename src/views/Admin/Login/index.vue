@@ -43,11 +43,6 @@
           </small>
         </div>
       </form>
-      <div class="mt-3">
-        <a href="#" class="text-start">Forgot your Id</a>
-        <span class="text-primary"> / </span>
-        <a href="#" class="text-start">password</a>
-      </div>
     </div>
   </div>
 </template>

@@ -5,99 +5,166 @@
         <h3 class="bg-dark text-white p-3 ps-4 mb-4 fw-bold pe-none">
           Manage Projects
         </h3>
-     
+
         <!-- 검색 입력 필드와 검색 버튼 추가 -->
-        <div class="manage-image-padding mb-3 d-flex">
-          <input
-            type="text"
-            v-model="searchKeyword"
-            placeholder="Search by project title"
-            class="form-control w-25 me-2"
-          />
-          <button class="btn btn-primary" @click="handleSearch">Search</button>
-        </div>
-        <div class="d-flex justify-content-end mb-3 me-5 pe-3">
-          <RouterLink to="/Admin/AdminUpload" class="btn btn-primary">
-            Create Project
-          </RouterLink>
-        </div>
-        <!-- 검색 결과가 있을 때와 없을 때를 처리 -->
-        <div v-if="projects.length">
-          <table class="table table-hover text-center align-middle mt-4">
-            <thead>
-              <tr>
-                <th @click="sort('id')" class="category col-md-1">No</th>
-                <th class="thumbnail">Thumbnail</th>
-                <th
-                  @click="sort('title')"
-                  class="category col-md-3 text-center"
-                >
-                  Project name
-                </th>
-                <th
-                  @click="sort('categoryName')"
-                  class="category col-md-2 text-center"
-                >
-                  Category
-                </th>
-                <th @click="sort('createdAt')" class="category col-md-1">
-                  Date
-                </th>
-                <th @click="sort('imageCount')" class="category col-md-1">
-                  Images
-                </th>
-                <th @click="sort('view')" class="category col-md-1">Views</th>
-                <th class="col-md-2"></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="project in projects" :key="project.id">
-                <td class="pe-none">{{ project.id }}</td>
-                <td>
-                  <img
-                    :src="project.imageUrl"
-                    alt="thumbnail"
-                    style="width: 100px; height: 100px"
-                  />
-                </td>
-                <td>
-                  <span class="underline-text pe-none">{{
-                    project.title
-                  }}</span>
-                </td>
-                <td class="pe-none">{{ project.categoryName }}</td>
-                <td class="pe-none">{{ project.createdAt }}</td>
-                <td class="pe-none">+{{ project.imageCount }}</td>
-                <td class="pe-none">{{ project.view }}</td>
-                <td>
-                  <div
-                    class="d-flex flex-column justify-content-center align-items-center"
-                  >
-                    <button
-                      class="btn btn-secondary img-edit-buttons btn-sm mb-1 w-50"
-                      @click="clickEdit(project.id)"
-                    >
-                      edit
-                    </button>
-                    <button
-                      class="btn btn-danger img-edit-buttons btn-sm w-50"
-                      @click="clickDeleteModal(project.id)"
-                    >
-                      delete
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <div
+          class="d-flex justify-content-between align-items-center mb-3 mx-5 mt-5 mb-3"
+        >
+          <div class="d-flex manage-image-padding">
+            <input
+              type="text"
+              v-model="searchKeyword"
+              placeholder="Search by project title"
+              class="form-control w-100 me-2"
+              @keyup.enter="handleSearch"
+            />
+            <button class="btn btn-primary me-2" @click="handleSearch">
+              Search
+            </button>
+            <button
+              class="btn btn-secondary"
+              @click="clearSearch"
+              v-if="isSearched"
+            >
+              Clear
+            </button>
+          </div>
+
+          <div>
+            <RouterLink to="/Admin/AdminUpload" class="btn btn-primary">
+              Create Project
+            </RouterLink>
+          </div>
         </div>
 
-        <!-- 검색 결과가 없을 때 메시지 출력 -->
+        <!-- 데이터 로딩 중일 때 스피너 표시 -->
+        <div v-if="isLoading" class="spinner-overlay">
+          <div class="spinner-border text-dark" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+        </div>
+
+        <!-- 데이터 로딩 완료 후 검색 결과 표시 -->
         <div v-else>
-          <p class="text-center text-muted">검색 결과 없음</p>
+          <div v-if="projects.length">
+            <table class="table table-hover text-center align-middle mt-4">
+              <thead>
+                <tr>
+                  <th @click="sort('id')" class="category col-md-1 sort-button">
+                    No
+                    <i
+                      v-if="currentSort === 'id'"
+                      :class="
+                        currentSortDir === 'asc'
+                          ? 'fa fa-arrow-up'
+                          : 'fa fa-arrow-down'
+                      "
+                    ></i>
+                  </th>
+                  <th class="thumbnail none-sort-button">Thumbnail</th>
+                  <th
+                    @click="sort('title')"
+                    class="category col-md-3 text-center sort-button"
+                  >
+                    Project name
+                    <i
+                      v-if="currentSort === 'title'"
+                      :class="
+                        currentSortDir === 'asc'
+                          ? 'fa fa-arrow-up'
+                          : 'fa fa-arrow-down'
+                      "
+                    ></i>
+                  </th>
+                  <th class="category col-md-2 text-center none-sort-button">
+                    Category
+                  </th>
+                  <th
+                    @click="sort('createdAt')"
+                    class="category col-md-1 sort-button"
+                  >
+                    Date
+                    <i
+                      v-if="currentSort === 'createdAt'"
+                      :class="
+                        currentSortDir === 'asc'
+                          ? 'fa fa-arrow-up'
+                          : 'fa fa-arrow-down'
+                      "
+                    ></i>
+                  </th>
+                  <th
+                    @click="sort('imageCount')"
+                    class="category col-md-1 none-sort-button"
+                  >
+                    Images
+                  </th>
+                  <th
+                    @click="sort('view')"
+                    class="category col-md-1 sort-button"
+                  >
+                    Views
+                    <i
+                      v-if="currentSort === 'view'"
+                      :class="
+                        currentSortDir === 'asc'
+                          ? 'fa fa-arrow-up'
+                          : 'fa fa-arrow-down'
+                      "
+                    ></i>
+                  </th>
+                  <th class="col-md-2"></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="project in projects" :key="project.id">
+                  <td class="pe-none">{{ project.id }}</td>
+                  <td>
+                    <img
+                      :src="project.imageUrl"
+                      alt="thumbnail"
+                      style="width: 100px; height: 100px"
+                    />
+                  </td>
+                  <td>
+                    <span class="underline-text pe-none">{{
+                      project.title
+                    }}</span>
+                  </td>
+                  <td class="pe-none">{{ project.categoryName }}</td>
+                  <td class="pe-none">{{ project.createdAt }}</td>
+                  <td class="pe-none">+{{ project.imageCount }}</td>
+                  <td class="pe-none">{{ project.view }}</td>
+                  <td>
+                    <div
+                      class="d-flex flex-column justify-content-center align-items-center"
+                    >
+                      <button
+                        class="btn btn-secondary img-edit-buttons btn-sm mb-1 w-50"
+                        @click="clickEdit(project.id)"
+                      >
+                        edit
+                      </button>
+                      <button
+                        class="btn btn-danger img-edit-buttons btn-sm w-50"
+                        @click="clickDeleteModal(project.id)"
+                      >
+                        delete
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <!-- 검색 결과가 없을 때 메시지 출력 -->
+          <div v-else>
+            <p class="text-center text-muted mt-5 pt-5">검색 결과 없음</p>
+          </div>
         </div>
 
         <Pagination
+          v-if="!isLoading"
           :current-page="currentPage"
           :total-pages="totalPages"
           @page-changed="handlePageChange"
@@ -168,13 +235,15 @@ const currentSort = ref("id"); // 기본 정렬 기준
 const currentSortDir = ref("desc"); // 기본 정렬 방향
 const currentItemNo = ref(null);
 const searchKeyword = ref(""); // 검색 키워드
-
+const isLoading = ref(true); // 로딩 상태 변수
+const isSearched = ref(false);
 onMounted(() => {
   loadProjects();
 });
 
 // 프로젝트 데이터 로드
 const loadProjects = async () => {
+  isLoading.value = true; // 로딩 시작
   try {
     const response = await axios.get("/get/adminProject", {
       params: {
@@ -190,14 +259,11 @@ const loadProjects = async () => {
     console.log("프로젝트 목록 로드 성공:", response.data);
   } catch (error) {
     console.error("프로젝트 목록 로드 실패:", error);
+  } finally {
+    isLoading.value = false; // 로딩 종료
   }
 };
 
-// 검색 처리 함수
-const handleSearch = () => {
-  currentPage.value = 0; // 검색 시 첫 페이지로 초기화
-  loadProjects(); // 검색 키워드로 프로젝트 목록 재로드
-};
 
 // 정렬 처리
 const sort = (sortField) => {
@@ -234,6 +300,18 @@ const deleteProject = async (id) => {
   }
 };
 
+const handleSearch = () => {
+  currentPage.value = 0; 
+  loadProjects(); 
+  isSearched.value = true; 
+};
+
+const clearSearch = () => {
+  searchKeyword.value = "";
+  isSearched.value = false; 
+  handleSearch(); 
+};
+
 // 페이지 변경 시 호출되는 함수
 const handlePageChange = (newPage) => {
   currentPage.value = newPage;
@@ -242,21 +320,17 @@ const handlePageChange = (newPage) => {
 </script>
 
 <style scoped>
-.table > thead > tr > .category {
+.spinner-overlay {
+  position: absolute;
+  top: 50%;
+  left: 55%;
+  transform: translate(-50%, -50%);
+  z-index: 10; /* 필요에 따라 z-index 조정 */
+}
+.sort-button {
   cursor: pointer;
 }
-.table > thead > tr > .thumbnail {
+.none-sort-button {
   cursor: default;
-}
-.manage-image-padding {
-  padding: 40px;
-}
-.img-edit-buttons {
-  height: 35px;
-}
-.underline-text {
-  display: inline-block;
-  border-bottom: 1px solid #000;
-  padding-bottom: 4px;
 }
 </style>

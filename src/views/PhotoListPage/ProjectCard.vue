@@ -41,7 +41,6 @@ onMounted(()=>{
 const loadMoreItems = async () => {
     categoryId.value = route.params.categoryId;
     subCategoryId.value=route.params.subCategoryId;
-  console.log("실행")
 
   if (isLoading.value || !hasMore.value) return;
   const params = {
