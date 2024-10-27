@@ -18,8 +18,15 @@
               class="form-control w-100 me-2"
               @keyup.enter="handleSearch"
             />
-            <button class="btn btn-primary" @click="handleSearch">
+            <button class="btn btn-primary me-2" @click="handleSearch">
               Search
+            </button>
+            <button
+              class="btn btn-secondary"
+              @click="clearSearch"
+              v-if="isSearched"
+            >
+              Clear
             </button>
           </div>
 
@@ -152,7 +159,7 @@
           </div>
           <!-- 검색 결과가 없을 때 메시지 출력 -->
           <div v-else>
-            <p class="text-center text-muted">검색 결과 없음</p>
+            <p class="text-center text-muted mt-5 pt-5">검색 결과 없음</p>
           </div>
         </div>
 
@@ -229,7 +236,7 @@ const currentSortDir = ref("desc"); // 기본 정렬 방향
 const currentItemNo = ref(null);
 const searchKeyword = ref(""); // 검색 키워드
 const isLoading = ref(true); // 로딩 상태 변수
-
+const isSearched = ref(false);
 onMounted(() => {
   loadProjects();
 });
@@ -257,11 +264,6 @@ const loadProjects = async () => {
   }
 };
 
-// 검색 처리 함수
-const handleSearch = () => {
-  currentPage.value = 0; // 검색 시 첫 페이지로 초기화
-  loadProjects(); // 검색 키워드로 프로젝트 목록 재로드
-};
 
 // 정렬 처리
 const sort = (sortField) => {
@@ -296,6 +298,18 @@ const deleteProject = async (id) => {
   } catch (error) {
     console.error("프로젝트 삭제 실패:", error);
   }
+};
+
+const handleSearch = () => {
+  currentPage.value = 0; 
+  loadProjects(); 
+  isSearched.value = true; 
+};
+
+const clearSearch = () => {
+  searchKeyword.value = "";
+  isSearched.value = false; 
+  handleSearch(); 
 };
 
 // 페이지 변경 시 호출되는 함수
