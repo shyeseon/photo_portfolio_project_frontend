@@ -2,9 +2,7 @@
   <nav class="sidebar sticky-top">
     <div class="position-sticky pt-3 ms-4 me-5">
       <h1 class="h2 mb-5 fw-bold">
-        <RouterLink class="text-decoration-none text-dark" to="/"
-          >Minography</RouterLink
-        >
+        <RouterLink class="text-decoration-none text-dark" to="/">Minography</RouterLink>
       </h1>
       <div class="accordion" id="photoProjectsAccordion">
         <div class="accordion-item border-0">
@@ -16,7 +14,6 @@
               data-bs-target="#collapsePhotoProjects"
               aria-expanded="true"
               aria-controls="collapsePhotoProjects"
-    
             >
               Photo projects
             </button>
@@ -30,13 +27,14 @@
             <div class="accordion-body pt-0 mb-3">
               <ul class="nav flex-column">
                 <li class="nav-item">
-                  <RouterLink class="nav-link" to="/" @click="menuItemClicked"
-                    >All</RouterLink
-                  >
+                  <RouterLink class="nav-link" to="/" @click="menuItemClicked">All</RouterLink>
                 </li>
                 <li class="nav-item" v-for="(category) in categories" :key="category.id">
-                  <RouterLink class="nav-link"  :to="{ name: 'photoList', params: { categoryId: category.id} }" 
-                  @click="menuItemClicked">{{ category.name }}</RouterLink>
+                  <RouterLink
+                    class="nav-link"
+                    :to="{ name: 'photoList', params: { categoryId: category.id } }"
+                    @click="menuItemClicked"
+                  >{{ category.name }}</RouterLink>
                 </li>
               </ul>
             </div>
@@ -45,29 +43,15 @@
       </div>
       <ul class="nav flex-column mt-3 fw-bold">
         <li class="nav-item">
-          <RouterLink class="nav-link pb-3" to="/about" @click="menuItemClicked"
-            >About</RouterLink
-          >
+          <RouterLink class="nav-link pb-3" to="/about" @click="menuItemClicked">About</RouterLink>
         </li>
         <li class="nav-item">
-          <RouterLink
-            class="nav-link mb-3"
-            to="/contact"
-            @click="menuItemClicked"
-            >Contact</RouterLink
-          >
+          <RouterLink class="nav-link mb-3" to="/contact" @click="menuItemClicked">Contact</RouterLink>
         </li>
       </ul>
       <div class="mt-3 ms-3 mb-3">
-        <!-- 인스타그램 -->
-        <a href="https://www.instagram.com/" class="sns-link text-dark"
-          ><i class="fa-brands fa-instagram me-3"></i
-        ></a>
-
-        <!-- 유튜브 -->
-        <a href="https://www.youtube.com/" class="sns-link text-dark"
-          ><i class="fa-brands fa-youtube"></i
-        ></a>
+        <a href="https://www.instagram.com/" class="sns-link text-dark"><i class="fa-brands fa-instagram me-3"></i></a>
+        <a href="https://www.youtube.com/" class="sns-link text-dark"><i class="fa-brands fa-youtube"></i></a>
       </div>
     </div>
   </nav>
@@ -75,29 +59,35 @@
 
 <script setup>
 import axios from 'axios';
-import { ref } from 'vue';
-import "@/apis/axiosConfig";
+import { ref, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
 
 const categories = ref([]);
-const getCategory = async() =>{
-  try{
-    const response = await axios.get("/categories");
-    categories.value = response.data.map (category => ({
-      id:category.id,
-      name:category.name
+const route = useRoute();
+
+// 페이지에 따라 적절한 카테고리를 가져오는 함수
+const getCategory = async () => {
+  try {
+    const viewParam = route.name === 'admin' ? 'admin' : 'main';
+    const response = await axios.get(`/get/categories`, {
+      params: { view: viewParam }
+    });
+    categories.value = response.data.map(category => ({
+      id: category.id,
+      name: category.name
     }));
-  }catch{
-    console.error("category 로드 실패" + Error);
+  } catch (error) {
+    console.error("카테고리 로드 실패:", error);
   }
-}
+};
 
 
-  getCategory();
+onMounted(getCategory);
 
-const emit = defineEmits(["menuItemClicked"]);
+const emit = defineEmits(['menuItemClicked']);
 
 function menuItemClicked() {
-  emit("menuItemClicked");
+  emit('menuItemClicked');
 }
 </script>
 
