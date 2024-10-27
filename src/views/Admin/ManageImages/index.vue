@@ -7,20 +7,27 @@
         </h3>
 
         <!-- 검색 입력 필드와 검색 버튼 추가 -->
-        <div class="manage-image-padding mb-3 d-flex">
-          <input
-            type="text"
-            v-model="searchKeyword"
-            placeholder="Search by project title"
-            class="form-control w-25 me-2"
-          />
-          <button class="btn btn-primary" @click="handleSearch">Search</button>
-        </div>
+        <div
+          class="d-flex justify-content-between align-items-center mb-3 mx-5 mt-5 mb-3"
+        >
+          <div class="d-flex manage-image-padding">
+            <input
+              type="text"
+              v-model="searchKeyword"
+              placeholder="Search by project title"
+              class="form-control w-100 me-2"
+              @keyup.enter="handleSearch"
+            />
+            <button class="btn btn-primary" @click="handleSearch">
+              Search
+            </button>
+          </div>
 
-        <div class="d-flex justify-content-end mb-3 me-5 pe-3">
-          <RouterLink to="/Admin/AdminUpload" class="btn btn-primary">
-            Create Project
-          </RouterLink>
+          <div>
+            <RouterLink to="/Admin/AdminUpload" class="btn btn-primary">
+              Create Project
+            </RouterLink>
+          </div>
         </div>
 
         <!-- 데이터 로딩 중일 때 스피너 표시 -->
