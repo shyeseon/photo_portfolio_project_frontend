@@ -87,7 +87,7 @@ const getCategory = async () => {
 // 세션 확인 함수
 const checkSession = async () => {
   try {
-    const response = await axios.get("/check-session");
+    const response = await axios.get("/loginSucess");
     isAdmin.value = response.data.isAdmin; // 관리자 여부를 isAdmin 변수에 저장
   } catch (error) {
     console.error("세션 확인 실패:", error);
