@@ -120,16 +120,14 @@ const loadMoreItems = async () => {
       //모달에서 보여질 때 배치가 달라지기 때문에 index값으로 보내줌
       index: listImages.value.length + index,
     }));
-    if (newImages.value.length === 0) {
-      hasMore.value = false;
-    } else {
-      listImages.value = [...listImages.value, ...newImages.value];
-      title.value = listImages.value[0].title;
-      console.log("page" + page.value);
-      await distributeItems();
+    hasMore.value=!response.data.last;
+    listImages.value = [...listImages.value, ...newImages.value];
+    title.value = listImages.value[0].title;
+    console.log("page" + page.value);
+    await distributeItems();
 
-      page.value++;
-    }
+    page.value++;
+    
   } catch (error) {
     console.error("Error fetching project images:", error);
   } finally {

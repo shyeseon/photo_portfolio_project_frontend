@@ -106,12 +106,10 @@ const loadMoreItems = async () => {
       categoryName: item.categoryName,
       imageLoaded: false,
     }));
-    if (newImages.value.length === 0) {
-      hasMore.value = false;
-    } else {
-      projects.value = [...projects.value, ...newImages.value];
-      page.value++;
-    }
+    hasMore.value=!response.data.last;
+    projects.value = [...projects.value, ...newImages.value];
+    page.value++;
+    
   } catch (error) {
     console.error("photoList 불러오기 실패", error);
   } finally {
