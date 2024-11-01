@@ -59,6 +59,7 @@
                id="category"
               v-model="selectedCategoryId"
               @change="handleCategoryChange(selectedCategoryId)">
+              <option value="" disabled selected>Select a category</option>
                 <option v-for="category in categories" :key="category.id" :value="category.id">
                     {{ category.name }}
                 </option>
@@ -68,6 +69,7 @@
             <div>
               <label for="subcategory" class="form-label">subcategory</label>
               <select class="form-select" v-model="selectedSubcategoryId" id="subcategory">
+                <option value="" disabled selected>Select a subcategory</option>
                 <option v-for="subCategory in selectedSubcategories" :key="subCategory.id" :value="subCategory.id">
                   {{ subCategory.name }}
                 </option>
@@ -161,9 +163,9 @@ import "@/apis/axiosConfig";
 const router = useRouter();
 const route = useRoute();
 
-const selectedCategoryId = ref(); // 선택된 카테고리 아이디
+const selectedCategoryId = ref(''); // 선택된 카테고리 아이디
 const selectedCategory = ref({}); // 선택된 카테고리 객체
-const selectedSubcategoryId = ref(); // 선택된 서브 카테고리 아이디
+const selectedSubcategoryId = ref(''); // 선택된 서브 카테고리 아이디
 const selectedSubcategories = ref({}); // 선택된 서브 카테고리 객체
 const projectName = ref(''); //프로젝트 title
 const categories = ref([]); // 받아온 카테고리들
@@ -226,61 +228,73 @@ const handleCategoryChange = (selectedCategoryId) => {
 
 
 // 프로젝트 저장
-const savebtn = async() => {
+const savebtn = async () => {
+  // 필수 입력 필드 검증
+  if (!projectName.value) {
+    alert("Please enter the project name.");
+    return;
+  }
+
+  if (!selectedCategoryId.value) {
+    alert("Please select a category.");
+    return;
+  }
+
+  if (!selectedSubcategoryId.value) {
+    alert("Please select a subcategory.");
+    return;
+  }
+
+  if (!thumbnailMultipartFile.value) {
+    alert("Please upload a thumbnail image.");
+    return;
+  }
+
+  if (photoMultipartFiles.value.length === 0) {
+    alert("Please upload at least one image for the project.");
+    return;
+  }
+
   isLoading.value = true; // 스피너 실행
   const formData = new FormData();
 
   // 이름 저장
-  console.log("프로젝트 이름: " + projectName.value);
   formData.append("title", projectName.value);
 
   // 썸네일 파일 저장
-  if(thumbnailMultipartFile.value) {
-    console.log("썸네일 사진: " + thumbnailMultipartFile.value);
-    formData.append("thumbnailMultipartFile", thumbnailMultipartFile.value);
+  formData.append("thumbnailMultipartFile", thumbnailMultipartFile.value);
+
+  // 포토 파일 저장
+  for (let i = 0; i < photoMultipartFiles.value.length; i++) {
+    formData.append("photoMultipartFiles", photoMultipartFiles.value[i]);
   }
 
-  if(photoMultipartFiles.value.length > 0) {
-    // 포토 파일 저장
-    for(let i = 0; i<photoMultipartFiles.value.length; i++){
-      formData.append("photoMultipartFiles",photoMultipartFiles.value[i]);
-    }
-    console.log("사진들: "+photoMultipartFiles.value)
-  }
-
-  // 기존 사진 중 삭제된 사진 id
-  if(deletedPhotoIds.value.length > 0) {
-    deletedPhotoIds.value.forEach((id, index) => {
-      formData.append(`deletedPhotoIds[${index}]`, id);
-    });
-  }
-
-  // 선택된 카테고리
-  console.log("선택된 카테고리 Id: " + selectedCategoryId.value);
+  // 카테고리 및 서브 카테고리 저장
   formData.append("categoryId", selectedCategoryId.value);
-
-  // 선택된 서브카테고리
-  console.log("서브카테고리 ID: " + selectedSubcategoryId.value);
   formData.append("subcategoryId", selectedSubcategoryId.value);
 
-  try{
-    if(route.params.id) { // 프로젝트 수정 요청
-      await axios.put(`/update/project/${route.params.id}`, formData);
-      console.log("프로젝트 수정 완료")
-    } else { // 프로젝트 생성 요청
-      await axios.post("/create/project", formData);
-    }
-    // 페이지 이동
-    await router.push("/Admin/ManageImages");
+  // 삭제된 사진 ID 목록 추가
+  deletedPhotoIds.value.forEach((id, index) => {
+    formData.append(`deletedPhotoIds[${index}]`, id);
+  });
 
-  } catch (error){
-    console.log("Project error" + error)
-    alert("Project creation failed. Please try again");
+  try {
+    if (route.params.id) {
+      await axios.put(`/update/project/${route.params.id}`, formData);
+      console.log("Project updated successfully");
+    } else {
+      await axios.post("/create/project", formData);
+      console.log("Project created successfully");
+    }
+    await router.push("/Admin/ManageImages");
+  } catch (error) {
+    console.error("Project error", error);
+    alert("Project creation failed. Please try again.");
   } finally {
     isLoading.value = false;
   }
-  
-}
+};
+
 
 // 카테고리 데이터 불러오기
 const loadCategories = async () => {
