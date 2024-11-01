@@ -44,7 +44,6 @@
           </div>
         </div>
       </div>
-
       <InfiniteScroll
         :loading="isLoading"
         :hasMore="hasMore"
@@ -108,7 +107,7 @@ onMounted(() => {
   if (!isMobile.value) {
     ImageDetailmodal = new Modal(document.querySelector("#ImageDetailmodal"));
   }
-  window.addEventListener("resize", handleResize); // Add resize listener
+  window.addEventListener("resize", handleResize); 
 });
 
 //이미지 불러오기
@@ -122,6 +121,7 @@ const loadMoreItems = async () => {
 
   try {
     id.value = route.params.projectId;
+    await new Promise(resolve => setTimeout(resolve, 1000));
     const response = await axios.get(`/photos/${id.value}`, { params });
     console.log(response.data);
     //newImages.value를 받아와서 넣어주는 부분을 else문과 합칠 수 있을 것 같다
@@ -230,13 +230,11 @@ async function modalOpen(index) {
 
 const closeModal = () => {
   if (!isMobile.value) {
-    console.log("모달 닫기");
     ImageDetailmodal.hide();
   }
 };
 
 const closeSwiperModal = () => {
-  console.log("Swiper 모달 닫기");
   showSwiperModal.value = false; // Swiper 모달 닫기
 };
 
@@ -262,7 +260,7 @@ watch(columnsCount, () => {
 
 <style scoped>
 html {
-  scroll-behavior: smooth; /* 부드러운 스크롤 */
+  scroll-behavior: smooth; 
 }
 
 .list {
