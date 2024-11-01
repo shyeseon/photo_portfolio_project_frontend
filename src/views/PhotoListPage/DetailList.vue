@@ -10,9 +10,10 @@
       <div class="d-flex align-items-end mb-4">
         <h4 class="fw-bold mb-0 me-3 user-select-none">{{ title }}</h4>
       </div>
-      <div class="d-flex justify-content-center">
+
+      <!-- 로딩 중일 때 스피너 표시 -->
+      <div v-if="isLoading" class="d-flex justify-content-center">
         <div
-          v-if="isLoading && page == 0"
           class="spinner-border position-absolute top-50 start-50"
           role="status"
         >
@@ -20,12 +21,20 @@
         </div>
       </div>
 
-      <div v-if="columns && columns.length" class="masonry-layout">
-        <!-- 이미지 배열을 담은 컬럼 반복 -->
+      <!-- 로딩 완료 후 이미지가 없을 때 메시지 표시 -->
+      <div
+        v-else-if="!isLoading && listImages.length === 0"
+        class="no-images-message d-flex justify-content-center align-items-center text-center py-5"
+      >
+        <p class="text-muted fs-4 fw-bold">
+          The project has no detailed images available.
+        </p>
+      </div>
+
+      <!-- 이미지가 있는 경우 masonry 레이아웃을 표시 -->
+      <div v-else class="masonry-layout">
         <div v-for="column in columns" :key="column.id" class="masonry-column">
-          <!-- 컬럼 내의 이미지 배열을 반복-->
           <div v-for="item in column.items" :key="item.id" class="masonry-item">
-            <!-- alt 부분: 생성할 때 description부분을 받아서 넣어야 할지 -->
             <img
               :src="item.imageUrl"
               :alt="item.title + item.index"
@@ -35,12 +44,14 @@
           </div>
         </div>
       </div>
+
       <InfiniteScroll
         :loading="isLoading"
         :hasMore="hasMore"
         @load-more="loadMoreItems"
       />
-      <!-- 데스크탑에서는 기존 모달 사용 -->
+
+      <!-- 데스크탑 모달 -->
       <ImageDetailModal
         v-if="!isMobile"
         id="ImageDetailmodal"
@@ -48,7 +59,8 @@
         :objectProp="listImages"
         :selectedIndex="currentSlideIndex"
       />
-      <!-- 모바일에서는 Swiper 모달 사용 -->
+
+      <!-- 모바일 Swiper 모달 -->
       <SwiperModal
         v-if="isMobile && showSwiperModal"
         :images="listImages"
@@ -120,14 +132,15 @@ const loadMoreItems = async () => {
       //모달에서 보여질 때 배치가 달라지기 때문에 index값으로 보내줌
       index: listImages.value.length + index,
     }));
-    hasMore.value=!response.data.last;
+    hasMore.value = !response.data.last;
     listImages.value = [...listImages.value, ...newImages.value];
-    title.value = listImages.value[0].title;
+    if (listImages.value.length > 0) {
+      title.value = listImages.value[0].title;
+    }
     console.log("page" + page.value);
     await distributeItems();
 
     page.value++;
-    
   } catch (error) {
     console.error("Error fetching project images:", error);
   } finally {
@@ -272,10 +285,10 @@ html {
 }
 .detail-image:hover {
   opacity: 0.8;
-  transition: .3s ease;
+  transition: 0.3s ease;
 }
-.fa-arrow-left-long:hover{
-  transition: .3s ease;
+.fa-arrow-left-long:hover {
+  transition: 0.3s ease;
   opacity: 0.5;
   cursor: pointer;
 }
