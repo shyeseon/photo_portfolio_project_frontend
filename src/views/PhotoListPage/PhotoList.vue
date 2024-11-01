@@ -10,6 +10,12 @@
         </button>
       </div>
     </div>
+    <div
+      v-if="projects.length === 0 && !isLoading"
+      class="position-absolute top-50 start-50 fw-bold fs-5"
+    >
+      Projects not found
+    </div>
     <div class="row row-cols-1 row-cols-md-3 g-4 mt-5">
       <div v-for="project in projects" :key="project.id" class="col">
         <RouterLink
@@ -34,11 +40,6 @@
             }}</small>
           </div>
         </RouterLink>
-      </div>
-    </div>
-    <div v-if="isLoading &&page>0" class="text-center py-5">
-      <div class="spinner-border" role="status">
-        <span class="visually-hidden">Loading...</span>
       </div>
     </div>
     <InfiniteScroll
@@ -93,11 +94,10 @@ const loadMoreItems = async () => {
     categoryId: categoryId.value,
     subCategoryId: subCategoryId.value,
     page: page.value,
-    size: 6,
+    size: 9,
   };
   isLoading.value = true;
   try {
-    await new Promise(resolve => setTimeout(resolve, 1000));
     const response = await axios.get("/get/project", { params });
     newImages.value = response.data.content.map((item) => ({
       id: item.id,
