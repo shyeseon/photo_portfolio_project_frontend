@@ -229,30 +229,32 @@ const handleCategoryChange = (selectedCategoryId) => {
 
 // 프로젝트 저장
 const savebtn = async () => {
-  // 필수 입력 필드 검증
-  if (!projectName.value) {
-    alert("Please enter the project name.");
-    return;
-  }
+  // 새로 추가하는 경우만 유효성 검사 수행
+  if (!route.params.id) {  
+    if (!projectName.value) {
+      alert("Please enter the project name.");
+      return;
+    }
 
-  if (!selectedCategoryId.value) {
-    alert("Please select a category.");
-    return;
-  }
+    if (!selectedCategoryId.value) {
+      alert("Please select a category.");
+      return;
+    }
 
-  if (!selectedSubcategoryId.value) {
-    alert("Please select a subcategory.");
-    return;
-  }
+    if (!selectedSubcategoryId.value) {
+      alert("Please select a subcategory.");
+      return;
+    }
 
-  if (!thumbnailMultipartFile.value) {
-    alert("Please upload a thumbnail image.");
-    return;
-  }
+    if (!thumbnailMultipartFile.value) {
+      alert("Please upload a thumbnail image.");
+      return;
+    }
 
-  if (photoMultipartFiles.value.length === 0) {
-    alert("Please upload at least one image for the project.");
-    return;
+    if (photoMultipartFiles.value.length === 0) {
+      alert("Please upload at least one image for the project.");
+      return;
+    }
   }
 
   isLoading.value = true; // 스피너 실행
@@ -261,8 +263,10 @@ const savebtn = async () => {
   // 이름 저장
   formData.append("title", projectName.value);
 
-  // 썸네일 파일 저장
-  formData.append("thumbnailMultipartFile", thumbnailMultipartFile.value);
+  // 썸네일 파일 저장 (파일이 변경된 경우에만)
+  if (thumbnailMultipartFile.value) {
+    formData.append("thumbnailMultipartFile", thumbnailMultipartFile.value);
+  }
 
   // 포토 파일 저장
   for (let i = 0; i < photoMultipartFiles.value.length; i++) {
@@ -294,6 +298,7 @@ const savebtn = async () => {
     isLoading.value = false;
   }
 };
+
 
 
 // 카테고리 데이터 불러오기
