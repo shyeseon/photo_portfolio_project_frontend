@@ -29,7 +29,7 @@
                 <li class="nav-item">
                   <RouterLink class="nav-link" to="/" @click="menuItemClicked">All</RouterLink>
                 </li>
-                <li class="nav-item" v-for="category in categories.filter((category) => category.hasProjects==true)" :key="category.id">
+                <li class="nav-item" v-for="category in categories.filter((category)=>category.hasProjects==true)" :key="category.id">
                   <RouterLink
                     class="nav-link"
                     :to="{ name: 'photoList', params: { categoryId: category.id }}"
@@ -62,8 +62,9 @@
 </template>
 
 <script setup>
+import store from "@/store";
 import axios from "axios";
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useRoute } from "vue-router";
 
 const categories = ref([]);
@@ -72,17 +73,8 @@ const route = useRoute();
 
 // 페이지에 따라 적절한 카테고리를 가져오는 함수
 const getCategory = async () => {
-  try {
-   // const viewParam = route.name === "admin" ? "admin" : "main";
-    const response = await axios.get('/get/categories');
-    categories.value = response.data.map((category) => ({
-      id: category.id,
-      name: category.name,
-      hasProjects: category.hasProjects
-    }));
-  } catch (error) {
-    console.error("카테고리 로드 실패:", error);
-  }
+  await store.dispatch('category/getAllCategories');
+  categories.value =  store.state.category.categories;
 };
 
 // 세션 확인 함수

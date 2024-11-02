@@ -12,7 +12,7 @@
       </div>
 
       <!-- 로딩 중일 때 스피너 표시 -->
-      <div v-if="isLoading" class="d-flex justify-content-center">
+      <div v-if="isLoading && page==0" class="d-flex justify-content-center">
         <div
           class="spinner-border position-absolute top-50 start-50"
           role="status"
@@ -32,7 +32,7 @@
       </div>
 
       <!-- 이미지가 있는 경우 masonry 레이아웃을 표시 -->
-      <div v-else class="masonry-layout">
+      <div class="masonry-layout">
         <div v-for="column in columns" :key="column.id" class="masonry-column">
           <div v-for="item in column.items" :key="item.id" class="masonry-item">
             <img

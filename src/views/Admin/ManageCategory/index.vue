@@ -115,6 +115,7 @@ import { ref, onMounted } from "vue";
 import axios from "axios";
 import CategoryList from "./CategoryList.vue";
 import SubCategoryList from "./SubCategoryList.vue";
+import store from "@/store";
 
 const categories = ref([]);
 const initialCategories = ref([]); // 초기 상태를 저장하는 변수
@@ -127,9 +128,9 @@ const isDeleteModalVisible = ref(false);
 // 카테고리 데이터 로드
 const loadCategories = async () => {
   try {
-    const response = await axios.get("/get/categories");
-    categories.value = response.data; // 백엔드에서 받은 카테고리 데이터를 할당
-    initialCategories.value = JSON.parse(JSON.stringify(response.data)); // 데이터를 복사해서 초기 상태로 저장
+    await store.dispatch('category/getAllCategories');
+    categories.value =  store.state.category.categories;
+    initialCategories.value = JSON.parse(JSON.stringify(store.state.category.categories)); // 데이터를 복사해서 초기 상태로 저장
   } catch (error) {
     console.error("카테고리 목록 로드 실패:", error);
   }

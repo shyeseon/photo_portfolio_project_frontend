@@ -42,6 +42,11 @@
         </RouterLink>
       </div>
     </div>
+    <div v-if="isLoading &&page>0" class="text-center py-5">
+      <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
     <InfiniteScroll
       :loading="isLoading"
       :hasMore="hasMore"
