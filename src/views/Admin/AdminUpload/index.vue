@@ -365,12 +365,13 @@ const onDrop = (acceptedFiles, rejectReasons) => {
   if (rejectReasons > 0 ) {
     console.log('rejectReasons', rejectReasons) // 거부된 파일의 이유들이 들어감
   }
-  if (acceptedFiles.length > 0 &&acceptedFiles[0].type.startsWith('image/')) {
+  if (acceptedFiles.length > 0 
+  && (acceptedFiles[0].type === 'image/jpeg' || acceptedFiles[0].type === 'image/png')) {
     // 첫 번째 파일만 처리하기 위해서 배열에서 첫번째 인덱스만 매개변수로 보냄
     FirstFileUpload(acceptedFiles[0]);
     thumbnailMultipartFile.value = acceptedFiles[0];
   } else {
-    alert('Only image files can be uploaded.');
+    alert('Only JPG or PNG file can be uploaded for thumbnail');
   }
 }
 
@@ -395,14 +396,14 @@ const onDrops = (acceptedFiles, rejectReasons) => {
   }
   if (acceptedFiles.length > 0 ) {
     const imageFiles = acceptedFiles.filter(file =>
-      file.type.startsWith('image/')); // image 타입만 다시 넣은 배열로 만듬
+    file.type === 'image/jpeg' || file.type === 'image/png'); // image 타입만 다시 넣은 배열로 만듬
       if(imageFiles.length === acceptedFiles.length){
          // 배열 자체를 전달함
         MultiFileUpload(imageFiles); 
         photoMultipartFiles.value = [...photoMultipartFiles.value, ...acceptedFiles];
         console.log("사진 저장: " + photoMultipartFiles.value);
       } else {
-        alert('Only image files can be uploaded.');
+        alert('Only JPG or PNG files can be uploaded for images');
       }
     
    
