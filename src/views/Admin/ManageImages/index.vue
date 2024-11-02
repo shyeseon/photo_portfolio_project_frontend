@@ -235,8 +235,9 @@ const currentSort = ref("id"); // 기본 정렬 기준
 const currentSortDir = ref("desc"); // 기본 정렬 방향
 const currentItemNo = ref(null);
 const searchKeyword = ref(""); // 검색 키워드
-const isLoading = ref(true); // 로딩 상태 변수
+const isLoading = ref(false); // 로딩 상태 변수
 const isSearched = ref(false);
+
 onMounted(() => {
   loadProjects();
 });
@@ -289,6 +290,7 @@ function clickDeleteModal(index) {
 }
 
 const deleteProject = async (id) => {
+  isLoading.value = true;
   try {
     const response = await axios.delete(`/delete/project/${id}`);
     console.log("프로젝트 삭제 성공:", response);
@@ -297,6 +299,9 @@ const deleteProject = async (id) => {
     projects.value = projects.value.filter((project) => project.id !== id);
   } catch (error) {
     console.error("프로젝트 삭제 실패:", error);
+  } finally {
+    isLoading.value = false;
+    loadProjects();
   }
 };
 
