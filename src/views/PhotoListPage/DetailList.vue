@@ -32,7 +32,7 @@
       </div>
 
       <!-- 이미지가 있는 경우 masonry 레이아웃을 표시 -->
-      <div v-else class="masonry-layout">
+      <div class="masonry-layout">
         <div v-for="column in columns" :key="column.id" class="masonry-column">
           <div v-for="item in column.items" :key="item.id" class="masonry-item">
             <img
@@ -126,16 +126,16 @@ const loadMoreItems = async () => {
     console.log(response.data);
 
     if (page.value === 0) {
-      title.value = response.data.content[0].title;
+      title.value = response.data.title;
       listImages.value.push({
         id: null,
-        imageUrl: response.data.content[0].thumbnailUrl,
+        imageUrl: response.data.thumbnailUrl,
         index: 0,
       });
     }
 
     //newImages.value를 받아와서 넣어주는 부분을 else문과 합칠 수 있을 것 같다
-    newImages.value = response.data.content.map((item, index) => ({
+    newImages.value = response.data.photos.content.map((item, index) => ({
       id: item.id,
       imageUrl: item.imageUrl,
       //모달에서 보여질 때 배치가 달라지기 때문에 index값으로 보내줌
