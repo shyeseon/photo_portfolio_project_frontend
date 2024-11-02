@@ -124,9 +124,18 @@ const loadMoreItems = async () => {
     await new Promise(resolve => setTimeout(resolve, 1000));
     const response = await axios.get(`/photos/${id.value}`, { params });
     console.log(response.data);
-    title.value = response.data.title;
+
+    if (page.value === 0) {
+      title.value = response.data.content[0].title;
+      listImages.value.push({
+        id: null,
+        imageUrl: response.data.content[0].thumbnailUrl,
+        index: 0,
+      });
+    }
+
     //newImages.value를 받아와서 넣어주는 부분을 else문과 합칠 수 있을 것 같다
-    newImages.value = response.data.photos.map((item, index) => ({
+    newImages.value = response.data.content.map((item, index) => ({
       id: item.id,
       imageUrl: item.imageUrl,
       //모달에서 보여질 때 배치가 달라지기 때문에 index값으로 보내줌
