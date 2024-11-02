@@ -148,6 +148,7 @@ const onImageLoad = (projectId) => {
 };
 
 watch(route, async (newRoute) => {
+  //다시 카테고리를 선택했을 때 subCategory 값이 여전히 남아있는 문제 
   if (newRoute.params.categoryId !== categoryId.value) {
     categoryId.value = newRoute.params.categoryId;
     subCategoryId.value = null;
@@ -162,7 +163,7 @@ watch(route, async (newRoute) => {
 .skeleton_loading {
   position: absolute;
   width: 100%;
-  height: 346px; /* 이미지 높이와 동일하게 설정 */
+  height: 346px;
   background: var(--bg-color);
 }
 
