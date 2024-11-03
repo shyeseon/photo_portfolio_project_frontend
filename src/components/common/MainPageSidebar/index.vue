@@ -26,13 +26,13 @@
           >
             <div class="accordion-body pt-0 mb-3">
               <ul class="nav flex-column">
-                <li class="nav-item">
+                <!-- <li class="nav-item">
                   <RouterLink class="nav-link" to="/" @click="menuItemClicked">All</RouterLink>
-                </li>
+                </li> -->
                 <li class="nav-item" v-for="category in categories" :key="category.id">
                   <RouterLink
                     class="nav-link"
-                    :to="{ name: 'photoList', params: { categoryId: category.id }}"
+                    :to="category.id ? { name: 'photoList', params: { categoryId: category.id }} : '/'"
                     @click="menuItemClicked"
                   >{{ category.name }}</RouterLink>
                 </li>
@@ -80,6 +80,11 @@ const getCategory = async () => {
       id: category.id,
       name: category.name,
     }));
+
+    categories.value.unshift({
+      id: null,
+      name: "All"
+    })
   } catch (error) {
     console.error("카테고리 로드 실패:", error);
   }
