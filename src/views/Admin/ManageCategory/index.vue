@@ -129,7 +129,7 @@ const isDeleteModalVisible = ref(false);
 const loadCategories = async () => {
   try {
     await store.dispatch('category/getAllCategories');
-    categories.value =  store.state.category.categories;
+    categories.value=store.state.category.categories;
     initialCategories.value = JSON.parse(JSON.stringify(store.state.category.categories)); // 데이터를 복사해서 초기 상태로 저장
   } catch (error) {
     console.error("카테고리 목록 로드 실패:", error);
