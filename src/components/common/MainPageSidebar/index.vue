@@ -26,13 +26,13 @@
           >
             <div class="accordion-body pt-0 mb-3">
               <ul class="nav flex-column">
-                <li class="nav-item">
+                <!-- <li class="nav-item">
                   <RouterLink class="nav-link" to="/" @click="menuItemClicked">All</RouterLink>
-                </li>
+                </li> -->
                 <li class="nav-item" v-for="category in categories" :key="category.id">
                   <RouterLink
                     class="nav-link"
-                    :to="{ name: 'photoList', params: { categoryId: category.id }}"
+                    :to="category.id ? { name: 'photoList', params: { categoryId: category.id }} : '/'"
                     @click="menuItemClicked"
                   >{{ category.name }}</RouterLink>
                 </li>
@@ -49,7 +49,7 @@
           <RouterLink class="nav-link mb-3" to="/contact" @click="menuItemClicked">Contact</RouterLink>
         </li>
         <!-- Admin 메뉴 항목 표시 -->
-        <li class="nav-item" v-if="isAdmin!=`anonymousUser`">
+        <li class="nav-item" v-if="store.state.id">
           <RouterLink class="nav-link mb-3" to="/Admin/ManageImages" @click="menuItemClicked">Admin</RouterLink>
         </li>
       </ul>
@@ -65,9 +65,10 @@
 import axios from "axios";
 import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
+import store from "@/store";
 
 const categories = ref([]);
-const isAdmin = ref(false); // 관리자인지 여부를 저장
+// const isAdmin = ref(false); // 관리자인지 여부를 저장
 const route = useRoute();
 
 // 페이지에 따라 적절한 카테고리를 가져오는 함수
@@ -79,24 +80,29 @@ const getCategory = async () => {
       id: category.id,
       name: category.name,
     }));
+
+    categories.value.unshift({
+      id: null,
+      name: "All"
+    })
   } catch (error) {
     console.error("카테고리 로드 실패:", error);
   }
 };
 
-// 세션 확인 함수
-const checkSession = async () => {
-  try {
-    const response = await axios.get("/loginSucess");
-    isAdmin.value = response.data.isAdmin; // 관리자 여부를 isAdmin 변수에 저장
-  } catch (error) {
-    console.error("세션 확인 실패:", error);
-  }
-};
+// // 세션 확인 함수
+// const checkSession = async () => {
+//   try {
+//     const response = await axios.get("/loginSucess");
+//     isAdmin.value = response.data.isAdmin; // 관리자 여부를 isAdmin 변수에 저장
+//   } catch (error) {
+//     console.error("세션 확인 실패:", error);
+//   }
+// };
 
 // 페이지가 로드될 때 세션을 확인하고 카테고리를 가져옵니다.
 onMounted(async () => {
-  await checkSession();
+  // await checkSession();
   await getCategory();
 });
 
