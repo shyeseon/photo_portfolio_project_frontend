@@ -75,9 +75,9 @@ const route = useRoute();
 const getCategory = async () => {
   try {
     const viewParam = route.name === "admin" ? "admin" : "main";
-    console.log("현재 route.name:", route.name);
     await store.dispatch('category/getAllCategories',{view:viewParam});
     categories.value=store.state.category.categories;
+
     categories.value.unshift({
       id: null,
       name: "All"
