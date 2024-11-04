@@ -12,7 +12,7 @@
       </div>
 
       <!-- 로딩 중일 때 스피너 표시 -->
-      <div v-if="isLoading" class="d-flex justify-content-center">
+      <div v-if="isLoading && page==0" class="d-flex justify-content-center">
         <div
           class="spinner-border position-absolute top-50 start-50"
           role="status"

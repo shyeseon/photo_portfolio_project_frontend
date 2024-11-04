@@ -75,11 +75,8 @@ const route = useRoute();
 const getCategory = async () => {
   try {
     const viewParam = route.name === "admin" ? "admin" : "main";
-    const response = await axios.get(`/get/categories`, { params: { view: viewParam } });
-    categories.value = response.data.map((category) => ({
-      id: category.id,
-      name: category.name,
-    }));
+    await store.dispatch('category/getAllCategories',{view:viewParam});
+    categories.value=store.state.category.categories;
 
     categories.value.unshift({
       id: null,

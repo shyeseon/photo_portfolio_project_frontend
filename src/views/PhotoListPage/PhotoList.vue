@@ -1,12 +1,13 @@
 <template>
   <div class="photo-gallery">
-    <div class="d-flex flex-wrap mb-5 mt-4">
+    <div class="d-flex flex-wrap mb-4 mt-4">
       <div v-for="category in subCategory" :key="category.id">
-        <button @click="selectedCategory(category.id)" class="btn border-0 p-2">
-          <h4 class="mb-0">
+        <button @click="selectedCategory(category.id)" class="btn border-0 p-2 d-flex" >
+          <h4 class="category-name mb-0 me-1" :class="{ 'selected-category': category.id === selectCategory }">
             {{ category.subName }}
-            <span v-if="category.index !== subCategory.length"> / </span>
-          </h4>
+            </h4>
+            <h4 v-if="category.index !== subCategory.length"> / </h4>
+          
         </button>
       </div>
     </div>
@@ -16,8 +17,8 @@
     >
       Projects not found
     </div>
-    <div class="row row-cols-1 row-cols-md-3 g-4 mt-5">
-      <div v-for="project in projects" :key="project.id" class="col">
+    <div class="row row-cols-1 row-cols-md-3 g-4 mt-5 mb-5">
+      <div v-for="project in projects" :key="project.id" class="col m-0">
         <RouterLink
           :to="{ name: 'DetailList', params: { projectId: project.id } }"
           class="card h-100 border-0 text-decoration-none"
@@ -40,6 +41,11 @@
             }}</small>
           </div>
         </RouterLink>
+      </div>
+    </div>
+    <div v-if="isLoading &&page>0" class="text-center py-5">
+      <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
       </div>
     </div>
     <InfiniteScroll
@@ -148,6 +154,7 @@ const onImageLoad = (projectId) => {
 };
 
 watch(route, async (newRoute) => {
+  //다시 카테고리를 선택했을 때 subCategory 값이 여전히 남아있는 문제 
   if (newRoute.params.categoryId !== categoryId.value) {
     categoryId.value = newRoute.params.categoryId;
     subCategoryId.value = null;
@@ -159,10 +166,17 @@ watch(route, async (newRoute) => {
 });
 </script>
 <style scoped>
+.selected-category{
+  text-decoration: underline;
+  text-underline-offset: 8px;
+}
+.category-name:hover {
+  color: gray;
+}
 .skeleton_loading {
   position: absolute;
   width: 100%;
-  height: 346px; /* 이미지 높이와 동일하게 설정 */
+  height: 346px;
   background: var(--bg-color);
 }
 

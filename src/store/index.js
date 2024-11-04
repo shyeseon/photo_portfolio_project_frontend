@@ -1,5 +1,6 @@
 import { createStore } from 'vuex'
 import axios from 'axios';
+import category from './category';
 
 export default createStore({
   state: {
@@ -26,5 +27,7 @@ export default createStore({
     }
   },
   modules: {
+    category:category
   }
+  
 })
