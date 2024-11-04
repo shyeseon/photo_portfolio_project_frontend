@@ -1,12 +1,13 @@
 <template>
   <div class="photo-gallery">
-    <div class="d-flex flex-wrap mb-5 mt-4">
+    <div class="d-flex flex-wrap mb-4 mt-4">
       <div v-for="category in subCategory" :key="category.id">
-        <button @click="selectedCategory(category.id)" class="btn border-0 p-2">
-          <h4 class="mb-0">
+        <button @click="selectedCategory(category.id)" class="btn border-0 p-2 d-flex" >
+          <h4 class="category-name mb-0 me-1" :class="{ 'selected-category': category.id === selectCategory }">
             {{ category.subName }}
-            <span v-if="category.index !== subCategory.length"> / </span>
-          </h4>
+            </h4>
+            <h4 v-if="category.index !== subCategory.length"> / </h4>
+          
         </button>
       </div>
     </div>
@@ -16,8 +17,8 @@
     >
       Projects not found
     </div>
-    <div class="row row-cols-1 row-cols-md-3 g-4 mt-5">
-      <div v-for="project in projects" :key="project.id" class="col">
+    <div class="row row-cols-1 row-cols-md-3 g-4 mt-5 mb-5">
+      <div v-for="project in projects" :key="project.id" class="col m-0">
         <RouterLink
           :to="{ name: 'DetailList', params: { projectId: project.id } }"
           class="card h-100 border-0 text-decoration-none"
@@ -165,6 +166,13 @@ watch(route, async (newRoute) => {
 });
 </script>
 <style scoped>
+.selected-category{
+  text-decoration: underline;
+  text-underline-offset: 8px;
+}
+.category-name:hover {
+  color: gray;
+}
 .skeleton_loading {
   position: absolute;
   width: 100%;
