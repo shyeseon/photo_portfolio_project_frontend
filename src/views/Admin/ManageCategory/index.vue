@@ -185,12 +185,12 @@ const deleteCategory = async (categoryId) => {
 
       if (deleteResponse.status === 200) {
         // 삭제 성공 시 처리
-        alert("카테고리가 삭제되었습니다.");
+        alert("Category has been deleted.");
         // UI에서 카테고리 제거
         removeCategoryFromUI(categoryId);
       } else {
         // 삭제 실패 시 처리
-        alert("카테고리 삭제에 실패했습니다.");
+        alert("Failed to delete category.");
       }
     }
   } catch (error) {
