@@ -159,6 +159,7 @@ watch(route, async (newRoute) => {
     categoryId.value = newRoute.params.categoryId;
     subCategoryId.value = null;
     projects.value = [];
+    selectCategory.value = null;
     page.value = 0;
     hasMore.value = true;
     await Promise.all([getSubCategory(), loadMoreItems()]);

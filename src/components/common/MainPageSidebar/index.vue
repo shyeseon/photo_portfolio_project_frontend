@@ -26,13 +26,11 @@
           >
             <div class="accordion-body pt-0 mb-3">
               <ul class="nav flex-column">
-                <!-- <li class="nav-item">
-                  <RouterLink class="nav-link" to="/" @click="menuItemClicked">All</RouterLink>
-                </li> -->
                 <li class="nav-item" v-for="category in categories" :key="category.id">
                   <RouterLink
                     class="nav-link"
                     :to="category.id ? { name: 'photoList', params: { categoryId: category.id }} : '/'"
+                    active-class="active"
                     @click="menuItemClicked"
                   >{{ category.name }}</RouterLink>
                 </li>
@@ -43,14 +41,13 @@
       </div>
       <ul class="nav flex-column mt-3 fw-bold">
         <li class="nav-item">
-          <RouterLink class="nav-link pb-3" to="/about" @click="menuItemClicked">About</RouterLink>
+          <RouterLink class="nav-link pb-3" to="/about" active-class="active" @click="menuItemClicked">About</RouterLink>
         </li>
         <li class="nav-item">
-          <RouterLink class="nav-link mb-3" to="/contact" @click="menuItemClicked">Contact</RouterLink>
+          <RouterLink class="nav-link mb-3" to="/contact" active-class="active" @click="menuItemClicked">Contact</RouterLink>
         </li>
-        <!-- Admin 메뉴 항목 표시 -->
         <li class="nav-item" v-if="store.state.id">
-          <RouterLink class="nav-link mb-3" to="/Admin/ManageImages" @click="menuItemClicked">Admin</RouterLink>
+          <RouterLink class="nav-link mb-3" to="/Admin/ManageImages" active-class="active" @click="menuItemClicked">Admin</RouterLink>
         </li>
       </ul>
       <div class="mt-3 ms-3 mb-3">
@@ -68,7 +65,6 @@ import { useRoute } from "vue-router";
 import store from "@/store";
 
 const categories = ref([]);
-// const isAdmin = ref(false); // 관리자인지 여부를 저장
 const route = useRoute();
 
 // 페이지에 따라 적절한 카테고리를 가져오는 함수
@@ -86,16 +82,6 @@ const getCategory = async () => {
     console.error("카테고리 로드 실패:", error);
   }
 };
-
-// // 세션 확인 함수
-// const checkSession = async () => {
-//   try {
-//     const response = await axios.get("/loginSucess");
-//     isAdmin.value = response.data.isAdmin; // 관리자 여부를 isAdmin 변수에 저장
-//   } catch (error) {
-//     console.error("세션 확인 실패:", error);
-//   }
-// };
 
 // 페이지가 로드될 때 세션을 확인하고 카테고리를 가져옵니다.
 onMounted(async () => {
@@ -132,5 +118,6 @@ function menuItemClicked() {
 
 .nav-link.active {
   font-weight: bold;
+  color: #007bff;
 }
 </style>
