@@ -16,7 +16,7 @@ const routes = [
         import(/* webpackChunkName: "Admin" */ "@/views/Admin/ManageCategory"),
       meta: { requiresAuth: true }
     },
-    {
+    { 
       path: "/Admin/ManageImages",
       component: () =>
         import(/* webpackChunkName: "Admin" */ "@/views/Admin/ManageImages"),

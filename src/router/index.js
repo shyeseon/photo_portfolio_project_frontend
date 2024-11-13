@@ -3,6 +3,7 @@ import admin from './admin';
 import { createRouter, createWebHistory } from "vue-router";
 import store from '@/store';
 import Image from "./Image"
+import error from "./error"
 
 
 const routes = [
@@ -32,6 +33,7 @@ const routes = [
       import(/* webpackChunkName: "contact" */ "../views/ContactView.vue"),
   },
 ...Image,
+...error,
 ];
 
 
