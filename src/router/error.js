@@ -1,7 +1,14 @@
+import PageNotFound from '@/views/Error/PageNotFound.vue';
+
 const routes = [
     {
-        path: '*', 
-        component: () => import (/* webpackChunkName: "Error" */ '@/views/Error/PageNotFound'),
+        path: "/404",
+        name: "PageNotFound",
+        component: PageNotFound,
+    },
+    {
+        path: '/:pathMatch(.*)*', 
+        redirect: "/404",
     },
 ];
 
