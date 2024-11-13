@@ -3,7 +3,7 @@ import admin from './admin';
 import { createRouter, createWebHistory } from "vue-router";
 import store from '@/store';
 import Image from "./Image"
-
+import NotFound from "@/views/NotFound.vue";
 
 const routes = [
   {
@@ -32,6 +32,10 @@ const routes = [
       import(/* webpackChunkName: "contact" */ "../views/ContactView.vue"),
   },
 ...Image,
+{
+  path: "*", // 모든 경로에 대한 catch-all (일반적인 404 페이지)
+  component: NotFound,
+},
 ];
 
 

@@ -28,10 +28,6 @@ const routes = [
     path: "/Admin*", // /Admin으로 시작하지만 정의되지 않은 모든 경로
     component: NotFound,
   },
-  {
-    path: "*", // 모든 경로에 대한 catch-all (일반적인 404 페이지)
-    component: NotFound,
-  },
 ];
 
 export default routes;
