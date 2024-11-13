@@ -1,3 +1,4 @@
+import NotFound from '@/views/NotFound.vue';
 const routes = [
     {
         path: '/Admin/AdminUpload/:id?', 
@@ -22,6 +23,10 @@ const routes = [
         import(/* webpackChunkName: "Admin" */ "@/views/Admin/ManageImages"),
       meta: { requiresAuth: true }
     },
+    {
+      path: '/Admin*',  // /Admin으로 시작하지만 정의되지 않은 모든 경로
+      component: NotFound
+  },
 ];
 
 export default routes;
