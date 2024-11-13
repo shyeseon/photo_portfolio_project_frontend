@@ -1,7 +1,7 @@
 <template>
   <div class="layout-container">
     <!-- 로그인 페이지가 아닐 때 사이드바 표시 -->
-    <div v-if="!isLoginPage" class="sidebar-part d-none d-md-block">
+    <div v-if="!isLoginPage && !isNotFoundPageCheck" class="sidebar-part d-none d-md-block">
       <Sidebar v-if="!check" />
       <AdminSidebar v-if="check" />
     </div>
@@ -9,7 +9,7 @@
     <!-- 콘텐츠 영역 -->
     <div class="content">
       <!-- 모바일용 네비게이션 바 -->
-      <nav class="navbar d-md-none navbar-light bg-light" v-if="!isLoginPage">
+      <nav class="navbar d-md-none navbar-light bg-light" v-if="!isLoginPage && !isNotFoundPageCheck">
         <div class="container-fluid">
           <RouterLink class="navbar-brand mb-0 h1 fw-bold text-decoration-none" to="/">Minography</RouterLink>
           <button
@@ -26,7 +26,7 @@
 
       <!-- 모바일용 오프캔버스 사이드바 -->
       <div
-        v-if="!isLoginPage"
+        v-if="!isLoginPage && !isNotFoundPageCheck"
         class="offcanvas offcanvas-start"
         tabindex="-1"
         id="offcanvasSidebar"
@@ -62,6 +62,7 @@ import { useRoute } from "vue-router";
 import "@/apis/axiosConfig"; // axios 기본 설정을 전체 앱에 적용
 const route = useRoute();
 
+const isNotFoundPageCheck = computed(() => route.path === "/404");
 const check = computed(() => route.path.toLowerCase().includes("/admin"));
 const isLoginPage = computed(() => route.path.toLowerCase().includes("/login"));
 
