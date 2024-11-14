@@ -3,6 +3,7 @@ import admin from './admin';
 import { createRouter, createWebHistory } from "vue-router";
 import store from '@/store';
 import Image from "./Image"
+import error from "./error"
 
 
 const routes = [
@@ -12,7 +13,7 @@ const routes = [
     component: HomeView,
   },
   {
-    path: "/About",
+    path: "/about",
     name: "About",
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route
@@ -23,7 +24,7 @@ const routes = [
   ...admin,
 
   {
-    path: "/Contact",
+    path: "/contact",
     name: "Contact",
     // route level code-splitting
     // this generates a separate chunk (contact.[hash].js) for this route
@@ -32,6 +33,7 @@ const routes = [
       import(/* webpackChunkName: "contact" */ "../views/ContactView.vue"),
   },
 ...Image,
+...error,
 ];
 
 
@@ -44,7 +46,7 @@ router.beforeEach((to, from, next) => {
 
   if(to.matched.some(record => record.meta.requiresAuth) && !store.state.id) {
       next({
-        path: "/Admin/Login",
+        path: "/admin/login",
         query: { redirect: to.fullPath }
       })
   } else {

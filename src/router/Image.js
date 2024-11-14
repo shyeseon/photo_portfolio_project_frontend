@@ -1,12 +1,12 @@
 const routes = [
     {
-        path: '/PhotoListPage/PhotoList/:categoryId/:subCategoryId?',
+        path: '/photoListPage/photoList/:categoryId/:subCategoryId?',
         name: "photoList",
         component: () =>  import(/* webpackChunkName: "Image" */ '@/views/PhotoListPage/PhotoList.vue')
       },
     {         
-        path: '/PhotoListPage/DetailList/:projectId',
-        name: 'DetailList',
+        path: '/photoListPage/detailList/:projectId',
+        name: 'detailList',
         component: () =>  import(/* webpackChunkName: "Image" */ '@/views/PhotoListPage/DetailList.vue')
     },
 
