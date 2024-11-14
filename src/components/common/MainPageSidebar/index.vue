@@ -51,7 +51,7 @@
         </li>
       </ul>
       <div class="mt-3 ms-3 mb-3">
-        <a href="https://www.instagram.com/" class="sns-link text-dark"><i class="fa-brands fa-instagram me-3"></i></a>
+        <a href="https://www.instagram.com/capture_mins/profilecard/?igsh=MTNzcjhmamMwdDN5dw%3D%3D" class="sns-link text-dark"><i class="fa-brands fa-instagram me-3"></i></a>
         <a href="https://www.youtube.com/" class="sns-link text-dark"><i class="fa-brands fa-youtube"></i></a>
       </div>
     </div>
