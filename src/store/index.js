@@ -17,7 +17,7 @@ export default createStore({
   actions: {
     async login({commit}, formData) {
       try {
-        const response = await axios.post("https://photo-portfolio-project-backend-450062450110.us-central1.run.app/loginProcess", formData);
+        const response = await axios.post("https://photo-portfolio-project-backend-test-450062450110.us-central1.run.app/loginProcess", formData);
         if(response.status === 200) {
           commit("login", response.data);
         }
