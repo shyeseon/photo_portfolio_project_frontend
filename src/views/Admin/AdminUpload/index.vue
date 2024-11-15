@@ -362,7 +362,7 @@ const savebtn = async () => {
       await axios.put(`/update/project/${route.params.id}`, formData);
       console.log("Project updated successfully");
     } else {
-      await axios.post("https://photo-portfolio-project-backend-450062450110.us-central1.run.app/api/create/project", formData);
+      await axios.post("https://photo-portfolio-project-backend-test-450062450110.us-central1.run.app/api/create/project", formData);
       console.log("Project created successfully");
     }
     await router.push("/Admin/ManageImages");
