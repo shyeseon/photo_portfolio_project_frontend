@@ -3,7 +3,7 @@
     <div class="row">
       <div class="col-md-4">
         <img
-          src="../assets/photographer.jpg"
+          src="https://images.unsplash.com/photo-1514860492795-97fcd3fe88d7?q=80&w=2576&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
           alt="Toronto Photographer"
           class="img-fluid rounded"
         />
