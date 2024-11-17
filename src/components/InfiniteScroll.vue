@@ -20,6 +20,7 @@ onMounted(() => {
     //callback
     (entries) => {
       if (entries[0].isIntersecting && !props.loading && props.hasMore) {
+        console.log("IntersectionObserver triggered.");
         emit('load-more');
       }
     },
