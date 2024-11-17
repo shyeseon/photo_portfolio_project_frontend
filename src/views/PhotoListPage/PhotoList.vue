@@ -102,9 +102,11 @@ const loadMoreItems = async () => {
     page: page.value,
     size: 9,
   };
+  console.log("Sending request with params:", params);
   isLoading.value = true;
   try {
     const response = await axios.get("/get/project", { params });
+    console.log("Response received:", response.data);
     newImages.value = response.data.content.map((item) => ({
       id: item.id,
       imageUrl: item.imageUrl,
