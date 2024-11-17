@@ -57,78 +57,113 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import InfiniteScroll from "@/components/InfiniteScroll.vue";
 import axios from "axios";
-
+import { onMounted, ref, watch } from "vue";
+import InfiniteScroll from "@/components/InfiniteScroll.vue";
+import { useRoute, useRouter } from "vue-router";
+const route = useRoute();
+const router = useRouter();
 const isLoading = ref(false);
 const hasMore = ref(true);
+
 const page = ref(0);
+
 const projects = ref([]);
+const newImages = ref([]);
+const categoryId = ref(null);
+const subCategoryId = ref(null);
 
-// 이미지 핸들링 함수
-const onImageLoaded = (event) => {
-  // 이미지 로드 성공 처리
-  event.target.classList.add('loaded');
-};
+const subCategory = ref([]);
 
-const onImageError = (event) => {
-  // 이미지 로드 실패시 대체 이미지로 교체
-  event.target.src = '/placeholder-image.jpg';
+onMounted(async () => {
+  if (categoryId.value != null) {
+    await Promise.all([getSubCategory(), loadMoreItems()]);
+  }
+});
+
+categoryId.value = route.params.categoryId;
+const getSubCategory = async () => {
+  try {
+    const response = await axios.get(`/subCategory/${categoryId.value}`);
+    subCategory.value = response.data.map((sub) => ({
+      id: sub.id,
+      subName: sub.name,
+    }));
+  } catch (error) {
+    console.error("subCategory 로드 실패 " + error);
+  }
 };
 
 const loadMoreItems = async () => {
-  if (isLoading.value || !hasMore.value) {
-    console.log('Skip loading:', { isLoading: isLoading.value, hasMore: hasMore.value });
-    return;
-  }
-
-  console.log('Starting to load page:', page.value);
+  if (isLoading.value || !hasMore.value) return;
+  const params = {
+    categoryId: categoryId.value,
+    subCategoryId: subCategoryId.value,
+    page: page.value,
+    size: 9,
+  };
   isLoading.value = true;
-
   try {
-    const response = await axios.get("/get/project", {
-      params: {
-        page: page.value,
-        size: 9
-      }
-    });
-
-    console.log('Full API Response:', response.data);
+    const response = await axios.get("/get/project", { params });
+    newImages.value = response.data.content.map((item) => ({
+      id: item.id,
+      imageUrl: item.imageUrl,
+      title: item.title,
+      categoryName: item.categoryName,
+      imageLoaded: false,
+    }));
+    hasMore.value=!response.data.last;
+    projects.value = [...projects.value, ...newImages.value];
+    page.value++;
     
-    if (response.data && Array.isArray(response.data.content)) {
-      // 데이터 처리 전에 유효성 검사
-      const validProjects = response.data.content.map(project => ({
-        ...project,
-        imageUrl: project.imageUrl || '/placeholder-image.jpg' // 이미지 URL이 없는 경우 대체 이미지 사용
-      }));
-
-      // 새 데이터 추가
-      projects.value = [...projects.value, ...validProjects];
-      
-      // 다음 페이지 존재 여부 확인
-      hasMore.value = response.data.hasNext;
-      
-      if (response.data.content.length > 0) {
-        page.value++;
-      }
-
-      console.log('Updated state:', {
-        projectsCount: projects.value.length,
-        currentPage: page.value,
-        hasMore: hasMore.value
-      });
-    }
   } catch (error) {
-    console.error('Failed to fetch projects:', error);
-    hasMore.value = false;
+    console.error("photoList 불러오기 실패", error);
   } finally {
     isLoading.value = false;
   }
 };
 
-onMounted(() => {
-  loadMoreItems();
+const selectCategory = ref(null);
+
+const selectedCategory = (categoryName) => {
+  selectCategory.value = categoryName;
+  if (!categoryName) {
+    console.log("none");
+  } else {
+    subCategoryId.value = selectCategory.value;
+    //해결 해야 할 문제 => 카테고리 클릭 시 계속 router push로 계속 보내면 안됨
+    router.push({
+      name: "photoList",
+      params: {
+        categoryId: categoryId.value,
+        subCategoryId: subCategoryId.value,
+      },
+    });
+    projects.value = [];
+    page.value = 0;
+    hasMore.value = true;
+    loadMoreItems();
+  }
+};
+
+const onImageLoad = (projectId) => {
+  const project = projects.value.find((p) => p.id === projectId);
+  if (project) {
+    project.imageLoaded = true;
+  }
+};
+
+watch(route, async (newRoute) => {
+  //다시 카테고리를 선택했을 때 subCategory 값이 여전히 남아있는 문제 
+  if (newRoute.params.categoryId !== categoryId.value) {
+    categoryId.value = newRoute.params.categoryId;
+    subCategoryId.value = null;
+    projects.value = [];
+    selectCategory.value = null;
+    page.value = 0;
+    hasMore.value = true;
+    await Promise.all([getSubCategory(), loadMoreItems()]);
+  }
 });
 </script>
 <style scoped>

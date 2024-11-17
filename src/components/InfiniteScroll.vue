@@ -1,8 +1,5 @@
 <template>
-  <div class="infinite-scroll-component">
-    <slot></slot>
-    <div ref="observerTarget" class="observer-target"></div>
-  </div>
+  <div ref="observerTarget"></div>
 </template>
 
 <script setup>
@@ -10,47 +7,39 @@ import { ref, onMounted, onUnmounted } from 'vue';
 
 const props = defineProps({
   loading: Boolean,
-  hasMore: Boolean,
+  hasMore:Boolean
 });
 
 const emit = defineEmits(['load-more']);
+
 const observerTarget = ref(null);
 
 onMounted(() => {
+  //observer 인스턴스 생성 
   const observer = new IntersectionObserver(
+    //callback
     (entries) => {
       if (entries[0].isIntersecting && !props.loading && props.hasMore) {
-        console.log("IntersectionObserver triggered at:", new Date().toISOString());
         emit('load-more');
       }
     },
+    //options
     {
       root: null,
-      rootMargin: "100px",
+      rootMargin: "20px",
       threshold: 0.1,
     }
   );
-
+  //타겟요소 관찰 시작 
   if (observerTarget.value) {
     observer.observe(observerTarget.value);
   }
-
-  // Cleanup
+  //타겟 요소 관찰 중지
   onUnmounted(() => {
-    if (observer) {
-      observer.disconnect();
+    if (observerTarget.value) {
+      observer.unobserve(observerTarget.value);
     }
   });
+  
 });
 </script>
-
-<style scoped>
-.infinite-scroll-component {
-  min-height: 100px;
-}
-
-.observer-target {
-  height: 20px;
-  width: 100%;
-}
-</style>
