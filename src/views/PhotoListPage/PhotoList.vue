@@ -65,7 +65,17 @@ const isLoading = ref(false);
 const hasMore = ref(true);
 const page = ref(0);
 const projects = ref([]);
-const error = ref(null);
+
+// 이미지 핸들링 함수
+const onImageLoaded = (event) => {
+  // 이미지 로드 성공 처리
+  event.target.classList.add('loaded');
+};
+
+const onImageError = (event) => {
+  // 이미지 로드 실패시 대체 이미지로 교체
+  event.target.src = '/placeholder-image.jpg';
+};
 
 const loadMoreItems = async () => {
   if (isLoading.value || !hasMore.value) {
@@ -75,10 +85,8 @@ const loadMoreItems = async () => {
 
   console.log('Starting to load page:', page.value);
   isLoading.value = true;
-  error.value = null;
 
   try {
-    // API 요청 URL과 경로가 정확한지 확인
     const response = await axios.get("/get/project", {
       params: {
         page: page.value,
@@ -86,34 +94,33 @@ const loadMoreItems = async () => {
       }
     });
 
-    // 응답 데이터 구조 확인을 위한 로깅
     console.log('Full API Response:', response.data);
     
     if (response.data && Array.isArray(response.data.content)) {
+      // 데이터 처리 전에 유효성 검사
+      const validProjects = response.data.content.map(project => ({
+        ...project,
+        imageUrl: project.imageUrl || '/placeholder-image.jpg' // 이미지 URL이 없는 경우 대체 이미지 사용
+      }));
+
       // 새 데이터 추가
-      projects.value = [...projects.value, ...response.data.content];
+      projects.value = [...projects.value, ...validProjects];
       
       // 다음 페이지 존재 여부 확인
       hasMore.value = response.data.hasNext;
       
-      // 데이터가 있을 경우에만 페이지 증가
       if (response.data.content.length > 0) {
         page.value++;
       }
 
-      // 현재 상태 로깅
       console.log('Updated state:', {
         projectsCount: projects.value.length,
         currentPage: page.value,
         hasMore: hasMore.value
       });
-    } else {
-      console.error('Invalid response format:', response.data);
-      error.value = 'Invalid data format received from server';
     }
-  } catch (err) {
-    console.error('API Error:', err);
-    error.value = err.response?.data?.message || 'Failed to load projects';
+  } catch (error) {
+    console.error('Failed to fetch projects:', error);
     hasMore.value = false;
   } finally {
     isLoading.value = false;
