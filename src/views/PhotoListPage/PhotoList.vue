@@ -38,7 +38,7 @@ const loadMoreItems = async () => {
   isLoading.value = true;
 
   try {
-    const response = await axios.get("/api/get/project", {
+    const response = await axios.get("/get/project", {
       params: {
         page: page.value,
         size: 9,
