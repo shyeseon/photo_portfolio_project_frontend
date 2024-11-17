@@ -6,7 +6,7 @@ const routes = [
       },
     {         
         path: '/photoListPage/detailList/:projectId',
-        name: 'detailList',
+        name: 'DetailList',
         component: () =>  import(/* webpackChunkName: "Image" */ '@/views/PhotoListPage/DetailList.vue')
     },
 
