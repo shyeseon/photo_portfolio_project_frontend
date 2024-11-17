@@ -113,7 +113,6 @@ const loadMoreItems = async () => {
       imageLoaded: false,
     }));
     hasMore.value=!response.data.last;
-    console.log("마지막 페이지 여부 : " + response.data.last);
     projects.value = [...projects.value, ...newImages.value];
     page.value++;
     
@@ -142,7 +141,7 @@ const selectedCategory = (categoryName) => {
     });
     projects.value = [];
     page.value = 0;
-    hasMore.value = true;
+    hasMore.value = false;
     loadMoreItems();
   }
 };
