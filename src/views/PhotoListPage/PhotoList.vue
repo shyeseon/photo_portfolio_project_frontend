@@ -1,25 +1,63 @@
 <template>
-  <div class="photo-list">
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      <div v-for="project in projects" :key="project.id" class="project-item">
-        <!-- 프로젝트 내용 -->
+  <div class="photo-gallery">
+    <div class="d-flex flex-wrap mb-4 mt-4">
+      <div v-for="category in subCategory" :key="category.id">
+        <button @click="selectedCategory(category.id)" class="btn border-0 p-2 d-flex" >
+          <h4 class="category-name mb-0 me-1" :class="{ 'selected-category': category.id === selectCategory }">
+            {{ category.subName }}
+            </h4>
+            <h4 v-if="category.index !== subCategory.length"> / </h4>
+          
+        </button>
       </div>
     </div>
-    
-    <InfiniteScroll 
-      :loading="isLoading" 
-      :hasMore="hasMore" 
-      @load-more="loadMoreItems"
+    <div
+      v-if="projects.length === 0 && !isLoading"
+      class="position-absolute top-50 start-50 fw-bold fs-5"
     >
-      <div v-if="isLoading" class="loading-indicator">
-        Loading...
+      Projects not found
+    </div>
+    <div class="row row-cols-1 row-cols-md-3 g-4 mt-5 mb-5">
+      <div v-for="project in projects" :key="project.id" class="col m-0">
+        <RouterLink
+          :to="{ name: 'DetailList', params: { projectId: project.id } }"
+          class="card h-100 border-0 text-decoration-none"
+        >
+          <div class="skeleton_loading" v-if="!project.imageLoaded">
+            <div class="skeleton_img w-100 h-100"></div>
+          </div>
+          <img
+            :src="project.imageUrl"
+            class="card-img-top object-fit-cover"
+            :alt="project.title"
+            height="346px"
+            @load="onImageLoad(project.id)"
+          />
+
+          <div class="card-body ps-0">
+            <h5 class="card-title fw-bolder">{{ project.title }}</h5>
+            <small class="text-muted font-lighter">{{
+              project.categoryName
+            }}</small>
+          </div>
+        </RouterLink>
       </div>
-    </InfiniteScroll>
+    </div>
+    <div v-if="isLoading &&page>0" class="text-center py-5">
+      <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+    <InfiniteScroll
+      :loading="isLoading"
+      :hasMore="hasMore"
+      @load-more="loadMoreItems"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted } from 'vue';
 import InfiniteScroll from "@/components/InfiniteScroll.vue";
 import axios from "axios";
 
@@ -27,72 +65,119 @@ const isLoading = ref(false);
 const hasMore = ref(true);
 const page = ref(0);
 const projects = ref([]);
+const error = ref(null);
 
 const loadMoreItems = async () => {
   if (isLoading.value || !hasMore.value) {
-    console.log('Skipping load: loading =', isLoading.value, 'hasMore =', hasMore.value);
+    console.log('Skip loading:', { isLoading: isLoading.value, hasMore: hasMore.value });
     return;
   }
 
-  console.log('Loading page:', page.value);
+  console.log('Starting to load page:', page.value);
   isLoading.value = true;
+  error.value = null;
 
   try {
+    // API 요청 URL과 경로가 정확한지 확인
     const response = await axios.get("/get/project", {
       params: {
         page: page.value,
-        size: 9,
-        // categoryId가 있다면 추가
-        ...(categoryId.value && { categoryId: categoryId.value })
-      },
+        size: 9
+      }
     });
 
-    console.log('Response:', {
-      content: response.data.content.length,
-      hasNext: response.data.hasNext,
-      number: response.data.number
-    });
+    // 응답 데이터 구조 확인을 위한 로깅
+    console.log('Full API Response:', response.data);
+    
+    if (response.data && Array.isArray(response.data.content)) {
+      // 새 데이터 추가
+      projects.value = [...projects.value, ...response.data.content];
+      
+      // 다음 페이지 존재 여부 확인
+      hasMore.value = response.data.hasNext;
+      
+      // 데이터가 있을 경우에만 페이지 증가
+      if (response.data.content.length > 0) {
+        page.value++;
+      }
 
-    // 새 데이터 추가
-    projects.value = [...projects.value, ...response.data.content];
-    
-    // 다음 페이지 있는지 확인
-    hasMore.value = response.data.hasNext;
-    
-    // 페이지 증가
-    if (response.data.content.length > 0) {
-      page.value++;
+      // 현재 상태 로깅
+      console.log('Updated state:', {
+        projectsCount: projects.value.length,
+        currentPage: page.value,
+        hasMore: hasMore.value
+      });
+    } else {
+      console.error('Invalid response format:', response.data);
+      error.value = 'Invalid data format received from server';
     }
-  } catch (error) {
-    console.error("Data fetch failed:", error);
+  } catch (err) {
+    console.error('API Error:', err);
+    error.value = err.response?.data?.message || 'Failed to load projects';
     hasMore.value = false;
   } finally {
     isLoading.value = false;
   }
 };
 
-// 카테고리 변경 감지
-const categoryId = ref(null);
-watch(categoryId, () => {
-  // 카테고리 변경시 초기화
-  projects.value = [];
-  page.value = 0;
-  hasMore.value = true;
-  loadMoreItems();
-});
-
 onMounted(() => {
   loadMoreItems();
 });
 </script>
-
 <style scoped>
-.photo-list {
-  min-height: 100vh;
+.selected-category{
+  text-decoration: underline;
+  text-underline-offset: 8px;
+}
+.category-name:hover {
+  color: gray;
+}
+.skeleton_loading {
+  position: absolute;
+  width: 100%;
+  height: 346px;
+  background: var(--bg-color);
 }
 
-.loading-indicator {
-  text-align: center;
-  padding: 1rem;
+.skeleton_img {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    120deg,
+    #e5e5e5 30%,
+    #f0f0f0 38%,
+    #f0f0f0 40%,
+    #e5e5e5 48%
+  );
+  background-size: 200% 100%;
+  background-position: 100% 0;
+  animation: load 1s infinite;
 }
+.card {
+  position: relative;
+  overflow: hidden;
+}
+
+.card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0); /* 초기 상태 - 투명 */
+  transition: background-color 0.3s ease; /* 부드러운 전환 효과 */
+  z-index: 2; /* 오버레이 요소에 높은 z-index 설정 */
+}
+
+.card:hover::before {
+  background-color: rgba(0, 0, 0, 0.2); /* hover 시 약 20% 어두운 오버레이 */
+}
+
+.card .card-img-top {
+  position: relative;
+  z-index: 1; /* 이미지에 낮은 z-index 설정 */
+}
+
+
 </style>
