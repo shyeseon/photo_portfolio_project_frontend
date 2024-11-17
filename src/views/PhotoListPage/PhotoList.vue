@@ -142,7 +142,7 @@ const selectedCategory = (categoryName) => {
     });
     projects.value = [];
     page.value = 0;
-    hasMore.value = false;
+    hasMore.value = true;
     loadMoreItems();
   }
 };
