@@ -1,6 +1,6 @@
 <template>
   <nav class="sidebar sticky-top">
-    <div class="position-sticky ms-4 me-5">
+    <div class="position-sticky pt-3 ms-4 me-5">
       <h1 class="h2 mb-5 fw-bold">
         <RouterLink class="text-decoration-none text-dark" to="/">Minography</RouterLink>
       </h1>
@@ -8,7 +8,7 @@
         <div class="accordion-item border-0">
           <h2 class="accordion-header" id="headingPhotoProjects">
             <button
-              class="accordion-button border-0 bg-transparent fw-bold pb-0 ps-3"
+              class="accordion-button border-0 bg-transparent fw-bold pb-0 ps-3 pt-0"
               type="button"
               data-bs-toggle="collapse"
               data-bs-target="#collapsePhotoProjects"
