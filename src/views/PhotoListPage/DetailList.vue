@@ -175,23 +175,22 @@ const createColumns = () => {
 const distributeItems = async () => {
   const sortedImgs = await preloadAndSortImages();
   createColumns();
-  //생성된 컬럼을 0으로 모두 초기화
+
+  const currentScroll = window.scrollY; // 현재 스크롤 위치 저장
   const columnHeights = Array(columnsCount.value).fill(0);
 
   sortedImgs.forEach((image, index) => {
-    //현재 컬럼에서 길이가 가장 짧은 컬럼ㅇ르 찾아 이미지 추가
-    const shortestColumnIndex = columnHeights.indexOf(
-      Math.min(...columnHeights)
-    );
-
+    const shortestColumnIndex = columnHeights.indexOf(Math.min(...columnHeights));
     columns.value[shortestColumnIndex].items.push({
       id: index,
       ...image,
     });
-    //이미지를 추가한 컬럼의 높이를 업데이트
     columnHeights[shortestColumnIndex] += image.height;
   });
+
+  window.scrollTo(0, currentScroll); // 이전 스크롤 위치로 복원
 };
+
 //이미지가 로딩 되기 전 레이아웃 배치가 이루어 지지 않도록 이미지를 모두 불러오기
 const preloadAndSortImages = async () => {
   //모든 이미지가 로딩되기 전에 distribute함수가 호출되면 에러가 발생하므로 promise를 사용해 모든 이미지가 로딩되고 함수가 실행하도록 함
