@@ -74,10 +74,12 @@ const getCategory = async () => {
     await store.dispatch('category/getAllCategories',{view:viewParam});
     categories.value=store.state.category.categories;
 
-    categories.value.unshift({
-      id: null,
-      name: "All"
-    })
+    if(categories.value.length > 0) {
+      categories.value.unshift({
+        id: null,
+        name: "All"
+      });
+    }
   } catch (error) {
     console.error("카테고리 로드 실패:", error);
   }
