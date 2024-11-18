@@ -12,7 +12,7 @@
       </div>
 
       <!-- 로딩 중일 때 스피너 표시 -->
-      <div v-if="isLoading && page==0" class="d-flex justify-content-center">
+      <div v-if="isLoading && page == 0" class="d-flex justify-content-center">
         <div
           class="spinner-border position-absolute top-50 start-50"
           role="status"
@@ -32,7 +32,8 @@
       </div>
 
       <!-- 이미지가 있는 경우 masonry 레이아웃을 표시 -->
-      <div class="masonry-layout">
+      <!-- 데스크탑: masonry 레이아웃 -->
+      <div v-if="!isMobile" class="masonry-layout">
         <div v-for="column in columns" :key="column.id" class="masonry-column">
           <div v-for="item in column.items" :key="item.id" class="masonry-item">
             <img
@@ -42,6 +43,18 @@
               @click="modalOpen(item.index)"
             />
           </div>
+        </div>
+      </div>
+
+      <!-- 모바일: 단순 리스트 -->
+      <div v-else class="mobile-image-list">
+        <div v-for="item in listImages" :key="item.id" class="mobile-item">
+          <img
+            :src="item.imageUrl"
+            :alt="item.title + item.index"
+            class="w-100 d-block object-fit-cover"
+            @click="modalOpen(item.index)"
+          />
         </div>
       </div>
       <InfiniteScroll
@@ -107,23 +120,19 @@ onMounted(() => {
   if (!isMobile.value) {
     ImageDetailmodal = new Modal(document.querySelector("#ImageDetailmodal"));
   }
-  window.addEventListener("resize", handleResize); 
+  window.addEventListener("resize", handleResize);
 });
 
 //이미지 불러오기
 const loadMoreItems = async () => {
-  // 이미 로딩 중이거나 모든 데이터를 로드한 경우 함수를 종료
   if (isLoading.value || !hasMore.value) return;
+
   isLoading.value = true;
-  const params = {
-    page: page.value,
-  };
+  const params = { page: page.value };
 
   try {
-    id.value = route.params.projectId;
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    const response = await axios.get(`/photos/${id.value}`, { params });
-    console.log(response.data);
+    const id = route.params.projectId;
+    const response = await axios.get(`/photos/${id}`, { params });
 
     if (page.value === 0) {
       title.value = response.data.title;
@@ -134,24 +143,19 @@ const loadMoreItems = async () => {
       });
     }
 
-    //newImages.value를 받아와서 넣어주는 부분을 else문과 합칠 수 있을 것 같다
-    newImages.value = response.data.photos.content.map((item, index) => ({
+    const newImages = response.data.photos.content.map((item, index) => ({
       id: item.id,
       imageUrl: item.imageUrl,
-      //모달에서 보여질 때 배치가 달라지기 때문에 index값으로 보내줌
       index: listImages.value.length + index,
     }));
-    hasMore.value = !response.data.last;
-    listImages.value = [...listImages.value, ...newImages.value];
-    // if (listImages.value.length > 0) {
-    //   title.value = listImages.value[0].title;
-    // }
-    console.log("page" + page.value);
-    await distributeItems();
 
+    hasMore.value = !response.data.last;
+    listImages.value = [...listImages.value, ...newImages];
     page.value++;
+
+    if (!isMobile.value) await distributeItems(); // 데스크탑에서만 distributeItems 호출
   } catch (error) {
-    console.error("Error fetching project images:", error);
+    console.error("Error loading items:", error);
   } finally {
     isLoading.value = false;
   }
@@ -180,7 +184,9 @@ const distributeItems = async () => {
   const columnHeights = Array(columnsCount.value).fill(0);
 
   sortedImgs.forEach((image, index) => {
-    const shortestColumnIndex = columnHeights.indexOf(Math.min(...columnHeights));
+    const shortestColumnIndex = columnHeights.indexOf(
+      Math.min(...columnHeights)
+    );
     columns.value[shortestColumnIndex].items.push({
       id: index,
       ...image,
@@ -268,7 +274,7 @@ watch(columnsCount, () => {
 
 <style scoped>
 html {
-  scroll-behavior: smooth; 
+  scroll-behavior: smooth;
 }
 
 .list {
@@ -297,5 +303,19 @@ html {
   transition: 0.3s ease;
   opacity: 0.5;
   cursor: pointer;
+}
+.mobile-image-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.mobile-item img {
+  border-radius: 5px;
+  transition: transform 0.3s;
+}
+
+.mobile-item img:hover {
+  transform: scale(1.05);
 }
 </style>
