@@ -41,7 +41,7 @@
             aria-label="Close"
           ></button>
         </div>
-        <div class="offcanvas-body">
+        <div class="offcanvas-body overflow-hidden">
           <Sidebar v-if="!check" @menuItemClicked="closeOffcanvas" />
           <AdminSidebar v-if="check" class="h-100 bg-black"/>
         </div>
