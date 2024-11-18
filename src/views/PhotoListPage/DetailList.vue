@@ -110,20 +110,25 @@ onMounted(() => {
   window.addEventListener("resize", handleResize); 
 });
 
-//이미지 불러오기
+const isAtEdge = () => {
+  const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+  const scrollHeight = document.documentElement.scrollHeight;
+  const clientHeight = document.documentElement.clientHeight;
+
+  // 최상단 또는 최하단에 있는지 확인
+  return scrollTop === 0 || scrollTop + clientHeight >= scrollHeight;
+};
+
 const loadMoreItems = async () => {
-  // 이미 로딩 중이거나 모든 데이터를 로드한 경우 함수를 종료
-  if (isLoading.value || !hasMore.value) return;
+  // 로딩 중, 데이터가 없거나 최상단/최하단인 경우 호출 방지
+  if (isLoading.value || !hasMore.value || isAtEdge()) return;
+
   isLoading.value = true;
-  const params = {
-    page: page.value,
-  };
+  const params = { page: page.value };
 
   try {
     id.value = route.params.projectId;
-    await new Promise(resolve => setTimeout(resolve, 1000));
     const response = await axios.get(`/photos/${id.value}`, { params });
-    console.log(response.data);
 
     if (page.value === 0) {
       title.value = response.data.title;
@@ -134,24 +139,18 @@ const loadMoreItems = async () => {
       });
     }
 
-    //newImages.value를 받아와서 넣어주는 부분을 else문과 합칠 수 있을 것 같다
-    newImages.value = response.data.photos.content.map((item, index) => ({
+    const newImages = response.data.photos.content.map((item, index) => ({
       id: item.id,
       imageUrl: item.imageUrl,
-      //모달에서 보여질 때 배치가 달라지기 때문에 index값으로 보내줌
       index: listImages.value.length + index,
     }));
-    hasMore.value = !response.data.last;
-    listImages.value = [...listImages.value, ...newImages.value];
-    // if (listImages.value.length > 0) {
-    //   title.value = listImages.value[0].title;
-    // }
-    console.log("page" + page.value);
-    await distributeItems();
 
+    hasMore.value = !response.data.last;
+    listImages.value = [...listImages.value, ...newImages];
     page.value++;
+    await distributeItems();
   } catch (error) {
-    console.error("Error fetching project images:", error);
+    console.error("Error loading items:", error);
   } finally {
     isLoading.value = false;
   }
