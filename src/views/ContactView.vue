@@ -46,8 +46,7 @@
             <h4 class="modal-title mb-3" id="emailModalLabel">Email Confirmation</h4>
             <p>
               <span>Thank you! </span>
-              <span>Your message has been successfully sent to </span>
-              <span class="fw-bold">wonmingy@gmail.com</span>
+              <span>Your message has been successfully sent</span>
             </p>
           </div>
         </div>
@@ -76,15 +75,15 @@
 
   // emailJs
   const sendEmail = () => {
-    emailjs.sendForm('service_nr04731', 'template_brdk4ii', form.value, {
-          publicKey: 'naKp_jmgiUrgnLWrV',
+    emailjs.sendForm('service_eh2bf9q', 'template_fh2rule', form.value, {
+          publicKey: 'pxfaPAyeIbJiQxtUZ',
         })
         .then(
           () => {
-            console.log('sending email is SUCCESS!');
+            // console.log('sending email is SUCCESS!');
           },
           (error) => {
-            console.log('sending email is FAILED...', error.text);
+            // console.log('sending email is FAILED...', error.text);
           },
         );
   };
