@@ -37,7 +37,7 @@
     </div>
 
     <!-- email confirmation modal -->
-    <div class="modal" id="emailModal" tabindex="-1">
+    <div class="modal fade" id="emailModal" tabindex="-1">
       <div class="modal-dialog ">
         <div class="modal-content">
           <button type="button" class="btn-close position-absolute top-0 end-0 m-2" data-bs-dismiss="modal" aria-label="Close"
