@@ -8,7 +8,7 @@
         <div class="accordion-item border-0">
           <h2 class="accordion-header" id="headingPhotoProjects">
             <button
-              class="accordion-button border-0 bg-transparent fw-bold pb-0 ps-3"
+              class="accordion-button border-0 bg-transparent fw-bold pb-0 ps-3 pt-0"
               type="button"
               data-bs-toggle="collapse"
               data-bs-target="#collapsePhotoProjects"
@@ -74,10 +74,12 @@ const getCategory = async () => {
     await store.dispatch('category/getAllCategories',{view:viewParam});
     categories.value=store.state.category.categories;
 
-    categories.value.unshift({
-      id: null,
-      name: "All"
-    })
+    if(categories.value.length > 0) {
+      categories.value.unshift({
+        id: null,
+        name: "All"
+      });
+    }
   } catch (error) {
     console.error("카테고리 로드 실패:", error);
   }
